@@ -35,6 +35,41 @@ class Board:
         self.y_3 = y_3
 
 
+    def set_view_live(self, left11, top11, x_11, y_11):
+        self.left11 = left11
+        self.top11 = top11
+        self.x_11 = x_11
+        self.y_11 = y_11
+
+
+    def set_view_prot(self, left12, top12, x_12, y_12):
+        self.left12 = left12
+        self.top12 = top12
+        self.x_12 = x_12
+        self.y_12 = y_12
+
+
+    def set_view_power(self, left13, top13, x_13, y_13):
+        self.left13 = left13
+        self.top13 = top13
+        self.x_13 = x_13
+        self.y_13 = y_13
+
+
+    def set_view_crit(self, left14, top14, x_14, y_14):
+        self.left14 = left14
+        self.top14 = top14
+        self.x_14 = x_14
+        self.y_14 = y_14
+
+
+    def set_view_out(self, left0, top0, x_0, y_0):
+        self.left0 = left0
+        self.top0 = top0
+        self.x_0 = x_0
+        self.y_0 = y_0
+
+
 ##    def set_view4(self, left4, top4, x_4, y_4):
 ##        self.left4 = left4
 ##        self.top4 = top4
@@ -44,25 +79,57 @@ class Board:
 
     def render(self, surface):
         wcolor = pygame.Color("white")
-        for i in range(self.height):
-            for j in range(self.width):
-                pygame.draw.rect(surface, wcolor,
-                                 (self.left1 + self.x_1 * j, self.top1 + self.y_1 * i,
-                                  self.x_1, self.y_1),
-                                 1 if self.board[i][j] == 0 else 0)
-        wcolor = pygame.Color("white")
-        for i in range(self.height):
-            for j in range(self.width):
-                pygame.draw.rect(surface, wcolor,
-                                 (self.left2 + self.x_2 * j, self.top2 + self.y_2 * i,
-                                  self.x_2, self.y_2),
-                                 1 if self.board[i][j] == 0 else 0)
-        for i in range(self.height):
-            for j in range(self.width):
-                pygame.draw.rect(surface, wcolor,
-                                 (self.left3 + self.x_3 * j, self.top3 + self.y_3 * i,
-                                  self.x_3, self.y_3),
-                                 1 if self.board[i][j] == 0 else 0)
+        if flag == 0:
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left1 + self.x_1 * j, self.top1 + self.y_1 * i,
+                                      self.x_1, self.y_1),
+                                     1 if self.board[i][j] == 0 else 0)
+            wcolor = pygame.Color("white")
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left2 + self.x_2 * j, self.top2 + self.y_2 * i,
+                                      self.x_2, self.y_2),
+                                     1 if self.board[i][j] == 0 else 0)
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left3 + self.x_3 * j, self.top3 + self.y_3 * i,
+                                      self.x_3, self.y_3),
+                                     1 if self.board[i][j] == 0 else 0)
+        elif flag == 1:
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left11 + self.x_11 * j, self.top11 + self.y_11 * i,
+                                      self.x_11, self.y_11),
+                                     1 if self.board[i][j] == 0 else 0)
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left12 + self.x_12 * j, self.top12 + self.y_12 * i,
+                                      self.x_12, self.y_12),
+                                     1 if self.board[i][j] == 0 else 0)
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left13 + self.x_13 * j, self.top13 + self.y_13 * i,
+                                      self.x_13, self.y_13),
+                                     1 if self.board[i][j] == 0 else 0)
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left14 + self.x_14 * j, self.top14 + self.y_14 * i,
+                                      self.x_14, self.y_14),
+                                     1 if self.board[i][j] == 0 else 0)
+            for i in range(self.height):
+                for j in range(self.width):
+                    pygame.draw.rect(surface, wcolor,
+                                     (self.left0 + self.x_0 * j, self.top0 + self.y_0 * i,
+                                      self.x_0, self.y_0),
+                                     1 if self.board[i][j] == 0 else 0)
 ##        for i in range(self.height):
 ##            for j in range(self.width):
 ##                pygame.draw.rect(surface, wcolor,
@@ -92,20 +159,37 @@ class Board:
  
     def on_click(self, cell_coords):
         global flag
-        #print(cell_coords)
-##        if cell_coords[0] > self.left4 and cell_coords[0] < self.x_4 + self.left4:
-##            if cell_coords[1] > self.top4 and cell_coords[1] < self.y_4 + self.top4:
-##                print("кнопка1")
-        if cell_coords[0] > self.left3 and cell_coords[0] < self.x_3 + self.left3:
-            if cell_coords[1] > self.top3 and cell_coords[1] < self.y_3 + self.top3:
-                print("кнопка1")
-                flag = 1
-        if cell_coords[0] > self.left2 and cell_coords[0] < self.x_2 + self.left2:
-            if cell_coords[1] > self.top2 and cell_coords[1] < self.y_2 + self.top2:
-                print("кнопка2")
-        if cell_coords[0] > self.left1 and cell_coords[0] < self.x_1 + self.left1:
-            if cell_coords[1] > self.top1 and cell_coords[1] < self.y_1 + self.top1:
-                print("кнопка3")
+        if flag == 0:
+    ##        if cell_coords[0] > self.left4 and cell_coords[0] < self.x_4 + self.left4:
+    ##            if cell_coords[1] > self.top4 and cell_coords[1] < self.y_4 + self.top4:
+    ##                print("кнопка1")
+            if cell_coords[0] > self.left3 and cell_coords[0] < self.x_3 + self.left3:
+                if cell_coords[1] > self.top3 and cell_coords[1] < self.y_3 + self.top3:
+                    print("кнопка1")
+                    flag = 1
+            if cell_coords[0] > self.left2 and cell_coords[0] < self.x_2 + self.left2:
+                if cell_coords[1] > self.top2 and cell_coords[1] < self.y_2 + self.top2:
+                    print("кнопка2")
+            if cell_coords[0] > self.left1 and cell_coords[0] < self.x_1 + self.left1:
+                if cell_coords[1] > self.top1 and cell_coords[1] < self.y_1 + self.top1:
+                    print("кнопка3")
+        elif flag == 1:
+            if cell_coords[0] > self.left11 and cell_coords[0] < self.x_11 + self.left11:
+                if cell_coords[1] > self.top11 and cell_coords[1] < self.y_11 + self.top11:
+                    print("кнопкаlive")
+            if cell_coords[0] > self.left12 and cell_coords[0] < self.x_12 + self.left12:
+                if cell_coords[1] > self.top12 and cell_coords[1] < self.y_12 + self.top12:
+                    print("кнопкаprot")
+            if cell_coords[0] > self.left13 and cell_coords[0] < self.x_13 + self.left13:
+                if cell_coords[1] > self.top13 and cell_coords[1] < self.y_13 + self.top13:
+                    print("кнопкаpower")
+            if cell_coords[0] > self.left14 and cell_coords[0] < self.x_14 + self.left14:
+                if cell_coords[1] > self.top14 and cell_coords[1] < self.y_14 + self.top14:
+                    print("кнопкаcrit")
+            if cell_coords[0] > self.left0 and cell_coords[0] < self.x_0 + self.left0:
+                if cell_coords[1] > self.top0 and cell_coords[1] < self.y_0 + self.top0:
+                    print("кнопкаout")
+                    flag = 0
     
             
 pygame.init()
@@ -140,17 +224,25 @@ while running:
         font = pygame.font.Font(None, 50)
         board = Board(1, 1)
 
-        board.set_view3(425, 400, 500, 75)
+        board.set_view_live(200, 200, 200, 300)
         text = font.render("Магазин", True, (100, 255, 100))
         screen.blit(text, (595, 420))
-        board.set_view2(425, 500, 500, 75)
-        text = font.render("Выбвень", True, (100, 255, 100))
-        screen.blit(text, (540, 520))
-        board.set_view1(425, 600, 500, 75)
-        text = font.render("Продоорию", True, (100, 255, 100))
-        screen.blit(text, (490, 620))
+        board.set_view_prot(450, 200, 200, 300)
+        text = font.render("Магазин", True, (100, 255, 100))
+        screen.blit(text, (595, 420))
+        board.set_view_power(700, 200, 200, 300)
+        text = font.render("Магазин", True, (100, 255, 100))
+        screen.blit(text, (595, 420))
+        board.set_view_crit(950, 200, 200, 300)
+        text = font.render("Магазин", True, (100, 255, 100))
+        screen.blit(text, (595, 420))
+        board.set_view_out(1315, 10, 25, 25)
+        text = font.render("Магазин", True, (100, 255, 100))
+        screen.blit(text, (595, 420))
+        
         #board.set_view4(425, 300, 500, 75)
     for event in pygame.event.get():
+        f2 = flag
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -158,7 +250,10 @@ while running:
 ##        if event.type == pygame.MOUSEMOTION:
 ##            pygame.draw.circle(screen, (0, 0, 255), event.pos, 20)
 ##        screen.fill((0, 0, 0))
-        board.render(screen)
-        pygame.display.flip()
-        clock.tick(fps)
+        if f2 == flag:
+            board.render(screen)
+            pygame.display.flip()
+            clock.tick(fps)
+        else:
+            break
 pygame.quit()
