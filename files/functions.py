@@ -24,5 +24,5 @@ main_hero_height = 100
 
 fps = 100
 GRAVITY = 2000
-JUMP = 800
+JUMP = 1000
 size = width, height = 1350, 700

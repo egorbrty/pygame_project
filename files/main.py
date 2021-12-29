@@ -29,6 +29,9 @@ class MainHero(pygame.sprite.Sprite):
         going_mas_left.append(pygame.transform.flip(image, True, False))
 
     image = load_image("data/pictures/clone/jump.png", -1)
+    image_rect = image.get_rect()
+    sizes = (image_rect.width * koeff, image_rect.height * koeff)
+    image = pygame.transform.scale(image, sizes)
 
     jump_image_right = image
     jump_image_left = pygame.transform.flip(image, True, False)
@@ -57,8 +60,14 @@ class MainHero(pygame.sprite.Sprite):
 
         self.onGround = True
 
+        self.picture_width = self.rect.width
+
     def update(self, left, right, up, space):
-        print(self.onGround)
+        if self.process[0] == 0:
+            self.rect.width = self.picture_width * 0.75
+        else:
+            self.rect.width = self.picture_width
+
         self.v_x = 0
         if left:
             self.v_x = -self.speed
@@ -74,7 +83,7 @@ class MainHero(pygame.sprite.Sprite):
 
         if not self.onGround:
             self.v_y += GRAVITY / fps
-
+        self.v_y += 1
         self.onGround = False
         self.rect.x += self.v_x / fps
         self.check_collide_x(self.v_x, field.textures_mas)
@@ -85,9 +94,9 @@ class MainHero(pygame.sprite.Sprite):
         camera.update(self,
                       field.level_width * SIZE_OF_BLOCK,
                       field.level_height * SIZE_OF_BLOCK
-        )
+                      )
 
-        if self.onGround or 1:
+        if self.onGround:
             self.process[1] += 10 / fps
             if int(self.process[1]) == len(self.going_mas_left):
                 self.process[1] = 0
@@ -106,6 +115,12 @@ class MainHero(pygame.sprite.Sprite):
 
         camera.move_camera(self)
 
+        #if self.left:
+        #    self.rect = self.image.get_rect(left=self.rect.left)
+        #    self.rect.width =
+        #else:
+        #    self.rect = self.image.get_rect(left=self.rect.left)
+
     def check_collide_x(self, v_x, textures):
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
@@ -116,6 +131,7 @@ class MainHero(pygame.sprite.Sprite):
                     self.rect.left = texture.rect.right  # то не движется влево
 
     def check_collide_y(self, v_y, textures):
+        self.rect.y += 1
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
                 if v_y > 0:  # если падает вниз
@@ -159,11 +175,12 @@ class Field:
         f = open(map_name)
         self.map_name = map_name
 
+        self.main_hero_sprite = pygame.sprite.Group()
+        self.main_hero_bullet_sprites = pygame.sprite.Group()
+
         self.persons_sprites = pygame.sprite.Group()
         self.textures_sprites = pygame.sprite.Group()
 
-        self.main_hero_sprite = pygame.sprite.Group()
-        self.main_hero_bullet_sprites = pygame.sprite.Group()
 
         self.block_rects = []
 
@@ -177,6 +194,7 @@ class Field:
         self.level_width, self.level_height = map(int, f.readline().split())
         level_mas = []
         self.textures_mas = []
+        main_hero_pos = (0, 0)
         for i in range(self.level_height):
             mas = []
             line = f.readline()
@@ -189,10 +207,12 @@ class Field:
                     self.block_rects.append(sprite.image.get_rect())
                 elif line[j] == '#':
                     mas.append('0')
-                    self.main_hero = MainHero(self.main_hero_sprite, j, i)
+                    main_hero_pos = (j, i)
 
-                    self.main_hero_sprite.add(self.main_hero)
             level_mas.append(mas)
+
+        self.main_hero = MainHero(self.main_hero_sprite, *main_hero_pos)
+        self.main_hero_sprite.add(self.main_hero)
         f.close()
 
     def replay(self):
@@ -200,7 +220,6 @@ class Field:
 
     def update(self, left, right, up, space):
         self.main_hero_sprite.update(left, right, up, space)
-        self.main_hero_sprite.draw(screen)
 
         self.persons_sprites.update(event)
         self.persons_sprites.draw(screen)
@@ -211,6 +230,8 @@ class Field:
         self.main_hero_bullet_sprites.update()
         self.main_hero_bullet_sprites.draw(screen)
 
+        self.main_hero_sprite.draw(screen)
+
     def move_camera(self):
         for sprite in self.persons_sprites:
             camera.apply(sprite)
@@ -220,7 +241,7 @@ class Field:
             camera.apply(sprite)
         for sprite in self.main_hero_sprite:
             camera.apply(sprite)
-            
+
     def move_camera_back(self):
         for sprite in self.main_hero_sprite:
             camera.move_back(sprite)
