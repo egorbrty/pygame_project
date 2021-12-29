@@ -11,41 +11,38 @@ screen = pygame.display.set_mode(size)
 
 
 class MainHero(pygame.sprite.Sprite):
-    # Бег
+    image = load_image(f"data/pictures/clone/running/run1.png", -1)
+    image_rect = image.get_rect()
+    koeff = main_hero_height / image_rect.height
+
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
-    going1 = load_image("data/pictures/clone/running/run1.png", -1)
-    going2 = load_image("data/pictures/clone/running/run2.png", -1)
-    going3 = load_image("data/pictures/clone/running/run3.png", -1)
-    going4 = load_image("data/pictures/clone/running/run4.png", -1)
-    going5 = load_image("data/pictures/clone/running/run5.png", -1)
-    going6 = load_image("data/pictures/clone/running/run6.png", -1)
-    going7 = load_image("data/pictures/clone/running/run7.png", -1)
-    going8 = load_image("data/pictures/clone/running/run8.png", -1)
-
     going_mas_right = []
-    going_mas_right.append(pygame.transform.scale(going1, sizes))
-    going_mas_right.append(pygame.transform.scale(going2, sizes))
-    going_mas_right.append(pygame.transform.scale(going3, sizes))
-    going_mas_right.append(pygame.transform.scale(going4, sizes))
-    going_mas_right.append(pygame.transform.scale(going5, sizes))
-    going_mas_right.append(pygame.transform.scale(going6, sizes))
-    going_mas_right.append(pygame.transform.scale(going7, sizes))
-    going_mas_right.append(pygame.transform.scale(going8, sizes))
+    going_mas_left = []
 
-    going_mas_left = [pygame.transform.flip(i, True, False) for i in going_mas_right]
+    for i in range(8):
+        image = load_image(f"data/pictures/clone/running/run{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        going_mas_right.append(image)
+        going_mas_left.append(pygame.transform.flip(image, True, False))
+
+    image = load_image("data/pictures/clone/jump.png", -1)
+
+    jump_image_right = image
+    jump_image_left = pygame.transform.flip(image, True, False)
 
     def __init__(self, group, x, y):
         super().__init__(group)
         self.start_position_x = x
         self.start_position_y = y
 
-        self.image = MainHero.going1
+        self.image = MainHero.going_mas_right[0]
         self.rect = self.image.get_rect()
 
         self.rect.x = x * SIZE_OF_BLOCK
         self.rect.bottom = y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
-
-        self.real_rect = self.rect.copy()
 
         self.process = [0, 0]  # Что в данный момент делает главный герой
 
@@ -61,11 +58,14 @@ class MainHero(pygame.sprite.Sprite):
         self.onGround = True
 
     def update(self, left, right, up, space):
+        print(self.onGround)
         self.v_x = 0
         if left:
             self.v_x = -self.speed
+            self.left = True
         if right:
             self.v_x = self.speed
+            self.left = False
         if up:
             if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
                 self.v_y = -JUMP
@@ -85,7 +85,25 @@ class MainHero(pygame.sprite.Sprite):
         camera.update(self,
                       field.level_width * SIZE_OF_BLOCK,
                       field.level_height * SIZE_OF_BLOCK
-                      )
+        )
+
+        if self.onGround or 1:
+            self.process[1] += 10 / fps
+            if int(self.process[1]) == len(self.going_mas_left):
+                self.process[1] = 0
+
+            if self.left:
+                self.image = MainHero.going_mas_left[int(self.process[1])]
+            else:
+                self.image = MainHero.going_mas_right[int(self.process[1])]
+
+        else:
+            self.process = [0, 0]
+            if self.left:
+                self.image = MainHero.jump_image_left
+            else:
+                self.image = MainHero.jump_image_right
+
         camera.move_camera(self)
 
     def check_collide_x(self, v_x, textures):
