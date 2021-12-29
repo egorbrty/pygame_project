@@ -1,0 +1,244 @@
+import pygame
+import os
+import sys
+import random
+from functions import *
+from camera import Camera
+
+pygame.init()
+pygame.display.set_caption('Star World')
+screen = pygame.display.set_mode(size)
+
+
+class MainHero(pygame.sprite.Sprite):
+    # Бег
+    sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
+    going1 = load_image("data/pictures/clone/running/run1.png", -1)
+    going2 = load_image("data/pictures/clone/running/run2.png", -1)
+    going3 = load_image("data/pictures/clone/running/run3.png", -1)
+    going4 = load_image("data/pictures/clone/running/run4.png", -1)
+    going5 = load_image("data/pictures/clone/running/run5.png", -1)
+    going6 = load_image("data/pictures/clone/running/run6.png", -1)
+    going7 = load_image("data/pictures/clone/running/run7.png", -1)
+    going8 = load_image("data/pictures/clone/running/run8.png", -1)
+
+    going_mas_right = []
+    going_mas_right.append(pygame.transform.scale(going1, sizes))
+    going_mas_right.append(pygame.transform.scale(going2, sizes))
+    going_mas_right.append(pygame.transform.scale(going3, sizes))
+    going_mas_right.append(pygame.transform.scale(going4, sizes))
+    going_mas_right.append(pygame.transform.scale(going5, sizes))
+    going_mas_right.append(pygame.transform.scale(going6, sizes))
+    going_mas_right.append(pygame.transform.scale(going7, sizes))
+    going_mas_right.append(pygame.transform.scale(going8, sizes))
+
+    going_mas_left = [pygame.transform.flip(i, True, False) for i in going_mas_right]
+
+    def __init__(self, group, x, y):
+        super().__init__(group)
+        self.start_position_x = x
+        self.start_position_y = y
+
+        self.image = MainHero.going1
+        self.rect = self.image.get_rect()
+
+        self.rect.x = x * SIZE_OF_BLOCK
+        self.rect.bottom = y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
+
+        self.real_rect = self.rect.copy()
+
+        self.process = [0, 0]  # Что в данный момент делает главный герой
+
+        self.speed = 300
+
+        self.left = False  # Направление движения
+
+        self.finished = True  # Окончено ли действие
+
+        self.v_x = 0  # Скорость движения по вертикали
+        self.v_y = 0  # Скорость движения по горизонтали
+
+        self.onGround = True
+
+    def update(self, left, right, up, space):
+        self.v_x = 0
+        if left:
+            self.v_x = -self.speed
+        if right:
+            self.v_x = self.speed
+        if up:
+            if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
+                self.v_y = -JUMP
+        if space:
+            self.die()
+
+        if not self.onGround:
+            self.v_y += GRAVITY / fps
+
+        self.onGround = False
+        self.rect.x += self.v_x / fps
+        self.check_collide_x(self.v_x, field.textures_mas)
+
+        self.rect.y += self.v_y / fps
+        self.check_collide_y(self.v_y, field.textures_mas)
+
+        camera.update(self,
+                      field.level_width * SIZE_OF_BLOCK,
+                      field.level_height * SIZE_OF_BLOCK
+                      )
+        camera.move_camera(self)
+
+    def check_collide_x(self, v_x, textures):
+        for texture in textures:
+            if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
+                if v_x > 0:  # если движется вправо
+                    self.rect.right = texture.rect.left  # то не движется вправо
+
+                if v_x < 0:  # если движется влево
+                    self.rect.left = texture.rect.right  # то не движется влево
+
+    def check_collide_y(self, v_y, textures):
+        for texture in textures:
+            if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
+                if v_y > 0:  # если падает вниз
+                    self.rect.bottom = texture.rect.top  # то не падает вниз
+                    self.onGround = True  # и становится на что-то твердое
+                    self.v_y = 0  # и энергия падения пропадает
+
+                if v_y < 0:  # если движется вверх
+                    self.rect.top = texture.rect.bottom  # то не движется вверх
+                    self.v_y = 0  # и энергия прыжка пропадает
+
+    def die(self):
+        field.replay()
+
+
+class Stone(pygame.sprite.Sprite):
+    image = load_image(r"data\pictures\textures\stone.png", -1)
+
+    sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
+
+    image = pygame.transform.scale(image, sizes)
+    def __init__(self, group, x_position, y_position):
+        super().__init__(group)
+        self.image = Stone.image
+
+        self.x_position = x_position
+        self.y_position = y_position
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x_position * SIZE_OF_BLOCK
+        self.rect.y = y_position * SIZE_OF_BLOCK
+
+    def update(self):
+        camera.move_camera(self)
+
+class Field:
+    def __init__(self):
+        pass
+
+    def start_game(self, map_name):
+        f = open(map_name)
+        self.map_name = map_name
+
+        self.persons_sprites = pygame.sprite.Group()
+        self.textures_sprites = pygame.sprite.Group()
+
+        self.main_hero_sprite = pygame.sprite.Group()
+        self.main_hero_bullet_sprites = pygame.sprite.Group()
+
+        self.block_rects = []
+
+        self.persons_a = list(map(int, f.readline().split()))
+        self.persons_b = list(map(int, f.readline().split()))
+        self.persons_c = list(map(int, f.readline().split()))
+        self.persons_d = list(map(int, f.readline().split()))
+        self.persons_e = list(map(int, f.readline().split()))
+        self.persons_f = list(map(int, f.readline().split()))
+
+        self.level_width, self.level_height = map(int, f.readline().split())
+        level_mas = []
+        self.textures_mas = []
+        for i in range(self.level_height):
+            mas = []
+            line = f.readline()
+            for j in range(self.level_width):
+                if line[j] == '3':
+                    mas.append('3')
+                    sprite = Stone(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+                    self.block_rects.append(sprite.image.get_rect())
+                elif line[j] == '#':
+                    mas.append('0')
+                    self.main_hero = MainHero(self.main_hero_sprite, j, i)
+
+                    self.main_hero_sprite.add(self.main_hero)
+            level_mas.append(mas)
+        f.close()
+
+    def replay(self):
+        self.start_game(self.map_name)
+
+    def update(self, left, right, up, space):
+        self.main_hero_sprite.update(left, right, up, space)
+        self.main_hero_sprite.draw(screen)
+
+        self.persons_sprites.update(event)
+        self.persons_sprites.draw(screen)
+
+        self.textures_sprites.update()
+        self.textures_sprites.draw(screen)
+
+        self.main_hero_bullet_sprites.update()
+        self.main_hero_bullet_sprites.draw(screen)
+
+    def move_camera(self):
+        for sprite in self.persons_sprites:
+            camera.apply(sprite)
+        for sprite in self.textures_sprites:
+            camera.apply(sprite)
+        for sprite in self.main_hero_bullet_sprites:
+            camera.apply(sprite)
+        for sprite in self.main_hero_sprite:
+            camera.apply(sprite)
+            
+    def move_camera_back(self):
+        for sprite in self.main_hero_sprite:
+            camera.move_back(sprite)
+        for sprite in self.persons_sprites:
+            camera.move_back(sprite)
+        for sprite in self.textures_sprites:
+            camera.move_back(sprite)
+        for sprite in self.main_hero_bullet_sprites:
+            camera.move_back(sprite)
+
+
+running = True
+clock = pygame.time.Clock()
+field = Field()
+field.start_game(r'data\maps\level_1.txt')
+
+# обновляем положение всех спрайтов
+
+camera = Camera()
+
+while running:
+    screen.fill((0, 0, 0))
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    keys = pygame.key.get_pressed()
+
+    field.update(
+        keys[pygame.K_LEFT],
+        keys[pygame.K_RIGHT],
+        keys[pygame.K_UP],
+        keys[pygame.K_SPACE]
+    )
+    pygame.display.flip()
+    field.move_camera_back()
+    clock.tick(fps)
+
+pygame.quit()
