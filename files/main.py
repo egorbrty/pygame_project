@@ -63,6 +63,7 @@ class MainHero(pygame.sprite.Sprite):
         self.picture_width = self.rect.width
 
     def update(self, left, right, up, space):
+        print(self.rect.x, self.rect.y)
         if self.process[0] == 0:
             self.rect.width = self.picture_width * 0.75
         else:
@@ -76,7 +77,7 @@ class MainHero(pygame.sprite.Sprite):
             self.v_x = self.speed
             self.left = False
         if up:
-            if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
+            if self.onGround:  # Прыжок произойдет, только если ты стоишь а земле
                 self.v_y = -JUMP
         if space:
             self.die()
@@ -146,6 +147,10 @@ class MainHero(pygame.sprite.Sprite):
     def die(self):
         field.replay()
 
+    def replay(self):
+        self.rect.x = self.start_position_x * SIZE_OF_BLOCK
+        self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
+
 
 class Stone(pygame.sprite.Sprite):
     image = load_image(r"data\pictures\textures\stone.png", -1)
@@ -167,6 +172,10 @@ class Stone(pygame.sprite.Sprite):
     def update(self):
         camera.move_camera(self)
 
+    def replay(self):
+        self.rect.x = self.x_position * SIZE_OF_BLOCK
+        self.rect.y = self.y_position * SIZE_OF_BLOCK
+
 class Field:
     def __init__(self):
         pass
@@ -180,9 +189,6 @@ class Field:
 
         self.persons_sprites = pygame.sprite.Group()
         self.textures_sprites = pygame.sprite.Group()
-
-
-        self.block_rects = []
 
         self.persons_a = list(map(int, f.readline().split()))
         self.persons_b = list(map(int, f.readline().split()))
@@ -204,7 +210,6 @@ class Field:
                     sprite = Stone(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
-                    self.block_rects.append(sprite.image.get_rect())
                 elif line[j] == '#':
                     mas.append('0')
                     main_hero_pos = (j, i)
@@ -216,7 +221,15 @@ class Field:
         f.close()
 
     def replay(self):
-        self.start_game(self.map_name)
+        self.main_hero.replay()
+        for i in self.persons_sprites:
+            i.replay()
+
+        for i in self.main_hero_bullet_sprites:
+            i.kill()
+        for i in self.textures_sprites:
+            i.replay()
+
 
     def update(self, left, right, up, space):
         self.main_hero_sprite.update(left, right, up, space)
@@ -231,16 +244,6 @@ class Field:
         self.main_hero_bullet_sprites.draw(screen)
 
         self.main_hero_sprite.draw(screen)
-
-    def move_camera(self):
-        for sprite in self.persons_sprites:
-            camera.apply(sprite)
-        for sprite in self.textures_sprites:
-            camera.apply(sprite)
-        for sprite in self.main_hero_bullet_sprites:
-            camera.apply(sprite)
-        for sprite in self.main_hero_sprite:
-            camera.apply(sprite)
 
     def move_camera_back(self):
         for sprite in self.main_hero_sprite:
