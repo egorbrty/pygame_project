@@ -20,7 +20,9 @@ def load_image(name, colorkey=None):
 
 
 SIZE_OF_BLOCK = 140
-main_hero_height = 100
+MAIN_HERO_HEIGHT = 100
+MAIN_HERO_SPEED = 300
+
 
 fps = 100
 GRAVITY = 2000

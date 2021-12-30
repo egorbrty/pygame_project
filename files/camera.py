@@ -9,7 +9,6 @@ class Camera:
         self.y = 0
 
     def update(self, target, level_width, level_height):
-        print('!!!!!!!!!!!!!!')
         center_x = target.rect.x + SIZE_OF_BLOCK // 2
         center_y = target.rect.y + SIZE_OF_BLOCK // 2
 
