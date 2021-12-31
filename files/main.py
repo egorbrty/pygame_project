@@ -4,6 +4,7 @@ import sys
 import random
 from functions import *
 from camera import Camera
+from textures import Stone, Grass, Sand, Ice
 
 pygame.init()
 pygame.display.set_caption('Star World')
@@ -116,13 +117,16 @@ class MainHero(pygame.sprite.Sprite):
 
         self.rect.width = self.picture_width * 0.75
 
+        self.mas_stand = list()  # Массив будет содержать ссылки на блоки, на которых стоит
+
     def get_damage(self, damage):
-        if self.process[0] not in (3, -3, -2) and self.last_damage >= 6:
+        if self.process[0] not in (-3, -2) and self.last_damage >= 6:
             self.hp -= damage
             if self.hp <= 0:
                 self.die_2()
             else:
-                self.process = [3, 0]
+                if self.onGround:
+                    self.process = [3, 0]
             self.last_damage = 0
 
     def update(self, left, right, up, space):
@@ -152,13 +156,19 @@ class MainHero(pygame.sprite.Sprite):
                 self.rect.x = self.start_position_x * SIZE_OF_BLOCK
                 self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
 
-            elif int(self.process[1]) + 1 == len(MainHero.start_mas):
+            elif int(self.process[1]) == len(MainHero.start_mas):
                 self.process = [0, 0]
                 self.image = MainHero.going_mas_right[0]
                 self.rect = self.image.get_rect()
 
                 self.rect.x = self.start_position_x * SIZE_OF_BLOCK
                 self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
+                camera.update(self,
+                          field.level_width * SIZE_OF_BLOCK,
+                          field.level_height * SIZE_OF_BLOCK
+                          )
+                camera.move_camera(self)
+                return
 
             self.image = MainHero.start_mas[int(self.process[1])]
 
@@ -169,12 +179,8 @@ class MainHero(pygame.sprite.Sprite):
             camera.move_camera(self)
             return
         elif self.process[0] == -3:
-            if self.process[1] == 0.1:
-                rect = self.image.get_rect()
-                height = rect.height
-                self.rect.bottom += height * 0.1
-
-            self.process[1] += 6 / fps
+            self.rect.height = 11800 / MAIN_HERO_HEIGHT
+            self.process[1] += 2 / fps
             if int(self.process[1]) == len(MainHero.going_mas_left):
                 self.die()
 
@@ -183,6 +189,11 @@ class MainHero(pygame.sprite.Sprite):
                     self.image = MainHero.die_2_mas_left[int(self.process[1])]
                 else:
                     self.image = MainHero.die_2_mas_right[int(self.process[1])]
+
+            rect = self.image.get_rect()
+
+            self.rect.bottom = self.onGround
+            self.rect.bottom += MAIN_HERO_HEIGHT * 0.28
 
             camera.update(self,
                           field.level_width * SIZE_OF_BLOCK,
@@ -217,10 +228,10 @@ class MainHero(pygame.sprite.Sprite):
 
         self.v_x = 0
         if left:
-            self.v_x = -self.speed
+            self.v_x -= self.speed
             self.left = True
         if right:
-            self.v_x = self.speed
+            self.v_x += self.speed
             self.left = False
         if up:
             if self.onGround:  # Прыжок произойдет, только если ты стоишь а земле
@@ -235,18 +246,24 @@ class MainHero(pygame.sprite.Sprite):
 
         self.rect.y += self.v_y / fps
         self.check_collide_y(self.v_y, field.textures_mas)
+        # Рассчет скорости (зависит от блоков, по которым движется персонаж)
+        if self.mas_stand:
+            v_mas = []
+            for i in self.mas_stand:
+                v_mas.append(i.get_speed(self.v_x, self.speed, self.left))
+            self.v_x = sum(v_mas) / len(v_mas)
 
-        self.rect.x += self.v_x / fps
+        self.rect.x += int(self.v_x / fps)
+
         self.check_collide_x(self.v_x, field.textures_mas)
-
 
         camera.update(self,
                       field.level_width * SIZE_OF_BLOCK,
                       field.level_height * SIZE_OF_BLOCK
                       )
 
-        if self.onGround:
-            if self.v_x:
+        if self.onGround and not up and self.process[0] not in (-3, 3):
+            if left or right:
                 if self.process[0] != 0:
                     self.process = [0, 0]
             else:
@@ -265,7 +282,6 @@ class MainHero(pygame.sprite.Sprite):
                     self.image = MainHero.going_mas_left[int(self.process[1])]
                 else:
                     self.image = MainHero.going_mas_right[int(self.process[1])]
-                self.fall = False
 
             elif self.process[0] == 5:
                 if self.left:
@@ -281,25 +297,14 @@ class MainHero(pygame.sprite.Sprite):
                 self.rect.bottom = self.onGround
                 self.rect.height = self.image.get_rect().height
 
-                self.fall = False
-
-        else:
+        elif self.process[0] != 3:
             if self.process[0] not in (-2, -3):
                 self.process = [1, 0]
                 if self.left:
                     self.image = MainHero.jump_image_left
                 else:
                     self.image = MainHero.jump_image_right
-            else:
-                self.fall = True
-
         camera.move_camera(self)
-
-        #if self.left:
-        #    self.rect = self.image.get_rect(left=self.rect.left)
-        #    self.rect.width =
-        #else:
-        #    self.rect = self.image.get_rect(left=self.rect.left)
 
     def check_collide_x(self, v_x, textures):
         for texture in textures:
@@ -312,16 +317,18 @@ class MainHero(pygame.sprite.Sprite):
 
     def check_collide_y(self, v_y, textures):
         self.rect.y += 1
+        self.mas_stand.clear()
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
-                if v_y > 0:  # если падает вниз
-                    self.rect.bottom = texture.rect.top  # то не падает вниз
-                    self.onGround = texture.rect.top  # и становится на что-то твердое
-                    self.v_y = 0  # и энергия падения пропадает
+                if v_y > 0:
+                    self.rect.bottom = texture.rect.top
+                    self.onGround = texture.rect.top
+                    self.v_y = 0  # энергия падения пропадает
 
                 if v_y < 0:  # если движется вверх
-                    self.rect.top = texture.rect.bottom  # то не движется вверх
-                    self.v_y = 0  # и энергия прыжка пропадает
+                    self.rect.top = texture.rect.bottom
+                    self.v_y = 0  # энергия прыжка пропадает
+                self.mas_stand.append(texture)
 
     def check_if_on_the_ground(self, textures):
         self.rect.y += 5
@@ -338,6 +345,7 @@ class MainHero(pygame.sprite.Sprite):
 
     def die_2(self):
         self.process = [-3, 0]
+        self.fall = not self.onGround
 
     def die(self):
         field.replay()
@@ -359,31 +367,6 @@ class MainHero(pygame.sprite.Sprite):
 
         self.hp = self.start_hp
 
-
-
-class Stone(pygame.sprite.Sprite):
-    image = load_image(r"data\pictures\textures\stone.png", -1)
-
-    sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
-
-    image = pygame.transform.scale(image, sizes)
-    def __init__(self, group, x_position, y_position):
-        super().__init__(group)
-        self.image = Stone.image
-
-        self.x_position = x_position
-        self.y_position = y_position
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x_position * SIZE_OF_BLOCK
-        self.rect.y = y_position * SIZE_OF_BLOCK
-
-    def update(self):
-        camera.move_camera(self)
-
-    def replay(self):
-        self.rect.x = self.x_position * SIZE_OF_BLOCK
-        self.rect.y = self.y_position * SIZE_OF_BLOCK
 
 class Field:
     def __init__(self):
@@ -407,23 +390,33 @@ class Field:
         self.persons_f = list(map(int, f.readline().split()))
 
         self.level_width, self.level_height = map(int, f.readline().split())
-        level_mas = []
         self.textures_mas = []
         main_hero_pos = (0, 0)
         for i in range(self.level_height):
-            mas = []
             line = f.readline()
             for j in range(self.level_width):
                 if line[j] == '3':
-                    mas.append('3')
                     sprite = Stone(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
-                elif line[j] == '#':
-                    mas.append('0')
-                    main_hero_pos = (j, i)
 
-            level_mas.append(mas)
+                elif line[j] == '1':
+                    sprite = Grass(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+
+                elif line[j] == '2':
+                    sprite = Sand(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+
+                elif line[j] == '8':
+                    sprite = Ice(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+
+                elif line[j] == '#':
+                    main_hero_pos = (j, i)
 
         self.main_hero = MainHero(self.main_hero_sprite, *main_hero_pos, 100)
         self.main_hero_sprite.add(self.main_hero)
@@ -446,7 +439,7 @@ class Field:
         self.persons_sprites.update(event)
         self.persons_sprites.draw(screen)
 
-        self.textures_sprites.update()
+        self.textures_sprites.update(camera)
         self.textures_sprites.draw(screen)
 
         self.main_hero_bullet_sprites.update()

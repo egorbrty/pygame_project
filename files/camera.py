@@ -10,7 +10,7 @@ class Camera:
 
     def update(self, target, level_width, level_height):
         center_x = target.rect.x + SIZE_OF_BLOCK // 2
-        center_y = target.rect.y + SIZE_OF_BLOCK // 2
+        center_y = target.rect.bottom - SIZE_OF_BLOCK // 2
 
         self.x = width // 2 - center_x
         self.y = height // 2 - center_y
