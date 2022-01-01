@@ -129,6 +129,15 @@ class MainHero(pygame.sprite.Sprite):
                     self.process = [3, 0]
             self.last_damage = 0
 
+    def check_position(self):
+        """Убивает игрока, если он вылетел далеко за пределы карты"""
+        if self.rect.x < 0 or self.rect.x > width:
+            self.fall = True
+            self.die_2()
+        elif self.rect.y < 0 or self.rect.y > height:
+            self.fall = True
+            self.die_2()
+
     def update(self, left, right, up, space):
         self.rect.width = self.picture_width * 0.75
 
@@ -149,14 +158,13 @@ class MainHero(pygame.sprite.Sprite):
             self.last_damage += 10 / fps
         if self.process[0] == -1:
             self.process[1] += 10 / fps
-            if int(self.process[1]) == 0:
-                self.image = MainHero.start_mas[0]
-                self.rect = self.image.get_rect()
+            self.image = MainHero.start_mas[0]
+            self.rect = self.image.get_rect()
 
-                self.rect.x = self.start_position_x * SIZE_OF_BLOCK
-                self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
+            self.rect.x = self.start_position_x * SIZE_OF_BLOCK
+            self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
 
-            elif int(self.process[1]) == len(MainHero.start_mas):
+            if int(self.process[1]) == len(MainHero.start_mas):
                 self.process = [0, 0]
                 self.image = MainHero.going_mas_right[0]
                 self.rect = self.image.get_rect()
@@ -263,7 +271,7 @@ class MainHero(pygame.sprite.Sprite):
                       )
 
         if self.onGround and not up and self.process[0] not in (-3, 3):
-            if left or right:
+            if (left or right) and not (right and left):
                 if self.process[0] != 0:
                     self.process = [0, 0]
             else:
@@ -304,7 +312,11 @@ class MainHero(pygame.sprite.Sprite):
                     self.image = MainHero.jump_image_left
                 else:
                     self.image = MainHero.jump_image_right
+        if self.process[0] in (0, 5):
+            self.rect.bottom = self.onGround
         camera.move_camera(self)
+
+        self.check_position()
 
     def check_collide_x(self, v_x, textures):
         for texture in textures:
@@ -342,6 +354,7 @@ class MainHero(pygame.sprite.Sprite):
 
     def die_1(self):
         self.process = [-2, 0]
+        self.fall = not self.onGround
 
     def die_2(self):
         self.process = [-3, 0]
@@ -363,7 +376,7 @@ class MainHero(pygame.sprite.Sprite):
         self.v_x = 0  # Скорость движения по вертикали
         self.v_y = 0  # Скорость движения по горизонтали
 
-        self.onGround = self.start_position_y
+        self.onGround = self.start_position_y * SIZE_OF_BLOCK
 
         self.hp = self.start_hp
 
