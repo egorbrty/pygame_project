@@ -5,6 +5,8 @@ import random
 from functions import *
 from camera import Camera
 from textures import Stone, Grass, Sand, Ice
+from enemies import BattleDroid
+from bullet import Bullet
 
 pygame.init()
 pygame.display.set_caption('Star World')
@@ -76,6 +78,18 @@ class MainHero(pygame.sprite.Sprite):
         hit_mas_right.append(image)
         hit_mas_left.append(pygame.transform.flip(image, True, False))
 
+    shoot_mas_right = []
+    shoot_mas_left = []
+
+    for i in range(7):
+        image = load_image(f"data/pictures/clone/shoot/shoot{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        shoot_mas_right.append(image)
+        shoot_mas_left.append(pygame.transform.flip(image, True, False))
+
     image = load_image("data/pictures/clone/jump.png", -1)
     image_rect = image.get_rect()
     sizes = (image_rect.width * koeff, image_rect.height * koeff)
@@ -84,18 +98,24 @@ class MainHero(pygame.sprite.Sprite):
     jump_image_right = image
     jump_image_left = pygame.transform.flip(image, True, False)
 
-    def __init__(self, group, x, y, start_hp):
+    def __init__(self, group, start_hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos):
         super().__init__(group)
-        self.start_position_x = x
-        self.start_position_y = y
+        self.start_position_x = x_pos
+        self.start_position_y = y_pos
         self.start_hp = start_hp
         self.hp = start_hp
+
+        self.armor = armor
+        self.hit = hit
+        self.crit = crit
+        self.dexterity = dexterity
+        self.accuracy = accuracy
 
         self.image = MainHero.start_mas[0]
         self.rect = self.image.get_rect()
 
-        self.rect.x = x * SIZE_OF_BLOCK
-        self.rect.bottom = y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
+        self.rect.x = x_pos * SIZE_OF_BLOCK
+        self.rect.bottom = y_pos * SIZE_OF_BLOCK + SIZE_OF_BLOCK
 
         self.process = [-1, 0]  # Что в данный момент делает главный герой
 
@@ -103,7 +123,7 @@ class MainHero(pygame.sprite.Sprite):
 
         self.left = False  # Направление движения
 
-        self.finished = True  # Окончено ли действие
+        self.finished = True  # Был ли выстрел
 
         self.v_x = 0  # Скорость движения по вертикали
         self.v_y = 0  # Скорость движения по горизонтали
@@ -119,8 +139,10 @@ class MainHero(pygame.sprite.Sprite):
 
         self.mas_stand = list()  # Массив будет содержать ссылки на блоки, на которых стоит
 
+        self.started = 0  # Как давно началась игра
+
     def get_damage(self, damage):
-        if self.process[0] not in (-3, -2) and self.last_damage >= 6:
+        if self.process[0] not in (-3, -2) and self.last_damage >= 15:
             self.hp -= damage
             if self.hp <= 0:
                 self.die_2()
@@ -139,7 +161,13 @@ class MainHero(pygame.sprite.Sprite):
             self.die_2()
 
     def update(self, left, right, up, space):
-        self.rect.width = self.picture_width * 0.75
+        # Чтобы игрок не мог управлять героем первые в секунды игры
+        if self.started < fps * 2:
+            self.started += 1
+            left, right, up, space = False, False, False, False
+
+        if self.process[0] != 2:
+            self.rect.width = self.picture_width * 0.75
 
         if self.process[0] in (-2, -3) and self.fall:
             self.rect.y += self.v_y / fps
@@ -154,8 +182,8 @@ class MainHero(pygame.sprite.Sprite):
             camera.move_camera(self)
             return
 
-        if self.last_damage < 6:
-            self.last_damage += 10 / fps
+        if self.last_damage < 15:
+            self.last_damage += 15 / fps
         if self.process[0] == -1:
             self.process[1] += 10 / fps
             self.image = MainHero.start_mas[0]
@@ -172,9 +200,9 @@ class MainHero(pygame.sprite.Sprite):
                 self.rect.x = self.start_position_x * SIZE_OF_BLOCK
                 self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
                 camera.update(self,
-                          field.level_width * SIZE_OF_BLOCK,
-                          field.level_height * SIZE_OF_BLOCK
-                          )
+                              field.level_width * SIZE_OF_BLOCK,
+                              field.level_height * SIZE_OF_BLOCK
+                              )
                 camera.move_camera(self)
                 return
 
@@ -187,7 +215,6 @@ class MainHero(pygame.sprite.Sprite):
             camera.move_camera(self)
             return
         elif self.process[0] == -3:
-            self.rect.height = 11800 / MAIN_HERO_HEIGHT
             self.process[1] += 2 / fps
             if int(self.process[1]) == len(MainHero.going_mas_left):
                 self.die()
@@ -198,11 +225,10 @@ class MainHero(pygame.sprite.Sprite):
                 else:
                     self.image = MainHero.die_2_mas_right[int(self.process[1])]
 
-            rect = self.image.get_rect()
+            self.rect.height = MAIN_HERO_HEIGHT * 1.1
 
             self.rect.bottom = self.onGround
-            self.rect.bottom += MAIN_HERO_HEIGHT * 0.28
-
+            self.rect.bottom += MAIN_HERO_HEIGHT * 0.19
             camera.update(self,
                           field.level_width * SIZE_OF_BLOCK,
                           field.level_height * SIZE_OF_BLOCK
@@ -224,7 +250,6 @@ class MainHero(pygame.sprite.Sprite):
                 self.rect.bottom = self.onGround
                 self.rect.height = self.image.get_rect().height
 
-
             camera.update(self,
                           field.level_width * SIZE_OF_BLOCK,
                           field.level_height * SIZE_OF_BLOCK
@@ -234,18 +259,58 @@ class MainHero(pygame.sprite.Sprite):
             return
             # hit_mas_left
 
+        if space and self.process[0] in (0, 5) and self.onGround:
+            if self.process[0] != 2:
+                self.process = [2, 0]
+                self.finished = False
+
+                if not self.left:
+                    self.rect.x += MAIN_HERO_HEIGHT * 0.18
+
+        if self.process[0] == 2:
+            if not self.onGround:
+                self.process = [5, 0]
+                self.finished = True
+
+            elif self.process[1] >= len(self.shoot_mas_left):
+                self.process = [5, 0]
+                if not self.left:
+                    self.rect.x -= MAIN_HERO_HEIGHT * 0.18
+
+            else:
+                if self.left:
+                    self.image = self.shoot_mas_left[int(self.process[1])]
+                else:
+                    self.image = self.shoot_mas_right[int(self.process[1])]
+
+                if int(self.process[1]) == 5 and not self.finished:
+                    sprite = Bullet(field.main_hero_bullet_sprites,
+                                    self.rect.x + MAIN_HERO_HEIGHT * 0.55,
+                                    self.rect.y + MAIN_HERO_HEIGHT * 0.25,
+                                    self.hit, self.crit, self.left)
+                    field.main_hero_bullet_sprites.add(sprite)
+                    self.finished = True
+
+                self.process[1] += 10 / fps
+
+                self.rect.height = self.image.get_height()
+                self.rect.bottom = self.onGround
+
+                camera.move_camera(self)
+                return
+
+
         self.v_x = 0
-        if left:
+        if left and self.process[0] != 2:
             self.v_x -= self.speed
             self.left = True
-        if right:
+        if right and self.process[0] != 2:
             self.v_x += self.speed
             self.left = False
+
         if up:
-            if self.onGround:  # Прыжок произойдет, только если ты стоишь а земле
+            if self.onGround and self.process[0] in (0, 5, 1):  # Прыжок произойдет, только если ты стоишь а земле
                 self.v_y = -JUMP
-        if space:
-            self.get_damage(25)
 
         if not self.onGround:
             self.v_y += GRAVITY / fps
@@ -253,6 +318,7 @@ class MainHero(pygame.sprite.Sprite):
         self.onGround = False
 
         self.rect.y += self.v_y / fps
+
         self.check_collide_y(self.v_y, field.textures_mas)
         # Рассчет скорости (зависит от блоков, по которым движется персонаж)
         if self.mas_stand:
@@ -260,17 +326,11 @@ class MainHero(pygame.sprite.Sprite):
             for i in self.mas_stand:
                 v_mas.append(i.get_speed(self.v_x, self.speed, self.left))
             self.v_x = sum(v_mas) / len(v_mas)
+        if self.process[0] != 2:
+            self.rect.x += int(self.v_x / fps)
+            self.check_collide_x(self.v_x, field.textures_mas)
 
-        self.rect.x += int(self.v_x / fps)
-
-        self.check_collide_x(self.v_x, field.textures_mas)
-
-        camera.update(self,
-                      field.level_width * SIZE_OF_BLOCK,
-                      field.level_height * SIZE_OF_BLOCK
-                      )
-
-        if self.onGround and not up and self.process[0] not in (-3, 3):
+        if self.onGround and not up and self.process[0] not in (-3, 3, 2):
             if (left or right) and not (right and left):
                 if self.process[0] != 0:
                     self.process = [0, 0]
@@ -314,6 +374,26 @@ class MainHero(pygame.sprite.Sprite):
                     self.image = MainHero.jump_image_right
         if self.process[0] in (0, 5):
             self.rect.bottom = self.onGround
+
+        if self.last_damage >= 15:
+            damage_sum = 0  # Урон, который персонаж
+            for i in field.persons_sprites:
+                if pygame.sprite.collide_rect(self, i):  # если есть пересечение врага с игроком
+                    if hit(i.accuracy, self.dexterity):
+                        print('Попадание')
+                        damage = i.hit
+                        if hit(i.crit, self.armor):
+                            print('crit')
+                            damage *= 2
+                        damage_sum += damage
+            if damage_sum:
+                self.get_damage(damage_sum)
+
+        camera.update(self,
+                      field.level_width * SIZE_OF_BLOCK,
+                      field.level_height * SIZE_OF_BLOCK
+                      )
+
         camera.move_camera(self)
 
         self.check_position()
@@ -380,12 +460,15 @@ class MainHero(pygame.sprite.Sprite):
 
         self.hp = self.start_hp
 
+        self.started = 0
+
 
 class Field:
     def __init__(self):
         pass
 
     def start_game(self, map_name):
+        self.main_hero_parameters = [100, 1, 25, 0, 0, 0]
         f = open(map_name)
         self.map_name = map_name
 
@@ -404,6 +487,14 @@ class Field:
 
         self.level_width, self.level_height = map(int, f.readline().split())
         self.textures_mas = []
+
+        self.start_position_a = []
+        self.start_position_b = []
+        self.start_position_c = []
+        self.start_position_d = []
+        self.start_position_e = []
+        self.start_position_f = []
+
         main_hero_pos = (0, 0)
         for i in range(self.level_height):
             line = f.readline()
@@ -431,33 +522,38 @@ class Field:
                 elif line[j] == '#':
                     main_hero_pos = (j, i)
 
-        self.main_hero = MainHero(self.main_hero_sprite, *main_hero_pos, 100)
+                elif line[j] == 'A':
+                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i)
+                    self.persons_sprites.add(sprite)
+                    self.start_position_a.append((j, i))
+
+        self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos)
         self.main_hero_sprite.add(self.main_hero)
         f.close()
 
     def replay(self):
-        self.main_hero.replay()
         for i in self.persons_sprites:
-            i.replay()
+            i.kill()
 
+        self.main_hero.replay()
         for i in self.main_hero_bullet_sprites:
             i.kill()
         for i in self.textures_sprites:
             i.replay()
 
+        for i in self.start_position_a:
+            sprite = BattleDroid(self.persons_sprites, *self.persons_a, *i)
+            self.persons_sprites.add(sprite)
 
     def update(self, left, right, up, space):
         self.main_hero_sprite.update(left, right, up, space)
-
-        self.persons_sprites.update(event)
-        self.persons_sprites.draw(screen)
-
+        self.persons_sprites.update(camera, field.textures_mas)
         self.textures_sprites.update(camera)
+        self.main_hero_bullet_sprites.update(camera, self.textures_sprites, self.persons_sprites)
+
+        self.persons_sprites.draw(screen)
         self.textures_sprites.draw(screen)
-
-        self.main_hero_bullet_sprites.update()
         self.main_hero_bullet_sprites.draw(screen)
-
         self.main_hero_sprite.draw(screen)
 
     def move_camera_back(self):

@@ -19,11 +19,24 @@ def load_image(name, colorkey=None):
     return image
 
 
-SIZE_OF_BLOCK = 140
-MAIN_HERO_HEIGHT = 100
-MAIN_HERO_SPEED = 300
+def hit(x, y):
+    """При ударе в функцию поступает информация о вероятности критического удара врага и броне гравного персонажа.
+    Функция на основе генератора псевдослучайнгых чисел определяет, попал ли враг по персонажу. Если True, то функция
+    вызывается вновь и определяет, критический удар или нет
+    Первый аргумент - меткость или вероятность критического удара
+    Второй аргумент - ловкость или броня"""
+    return True
 
-fps = 150
+
+SIZE_OF_BLOCK = 150
+
+MAIN_HERO_HEIGHT = 100
+MAIN_HERO_SPEED = 400
+
+BATTLE_DROID_HEIGHT = 75
+BATTLE_DROID_SPEED = 125
+
+fps = 100
 GRAVITY = 2000
-JUMP = 1200
+JUMP = 1150
 size = width, height = 1350, 700
