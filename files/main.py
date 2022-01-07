@@ -162,7 +162,7 @@ class MainHero(pygame.sprite.Sprite):
 
     def update(self, left, right, up, space):
         # Чтобы игрок не мог управлять героем первые в секунды игры
-        if self.started < fps * 2:
+        if self.started < fps * 1.5:
             self.started += 1
             left, right, up, space = False, False, False, False
 
@@ -287,7 +287,7 @@ class MainHero(pygame.sprite.Sprite):
                     sprite = Bullet(field.main_hero_bullet_sprites,
                                     self.rect.x + MAIN_HERO_HEIGHT * 0.55,
                                     self.rect.y + MAIN_HERO_HEIGHT * 0.25,
-                                    self.hit, self.crit, self.left)
+                                    self.hit, self.crit, self.accuracy, self.left)
                     field.main_hero_bullet_sprites.add(sprite)
                     self.finished = True
 
@@ -378,7 +378,7 @@ class MainHero(pygame.sprite.Sprite):
         if self.last_damage >= 15:
             damage_sum = 0  # Урон, который персонаж
             for i in field.persons_sprites:
-                if pygame.sprite.collide_rect(self, i):  # если есть пересечение врага с игроком
+                if i.is_alive() and pygame.sprite.collide_rect(self, i):  # если есть пересечение врага с игроком
                     if hit(i.accuracy, self.dexterity):
                         print('Попадание')
                         damage = i.hit
@@ -386,6 +386,9 @@ class MainHero(pygame.sprite.Sprite):
                             print('crit')
                             damage *= 2
                         damage_sum += damage
+                    else:
+                        print('Мимо!')
+
             if damage_sum:
                 self.get_damage(damage_sum)
 

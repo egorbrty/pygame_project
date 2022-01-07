@@ -87,7 +87,7 @@ class Sand(pygame.sprite.Sprite):
         self.rect.y = self.y_position * SIZE_OF_BLOCK
 
     def get_speed(self, speed, maximum_speed, left):
-        return speed * 0.75
+        return round(speed * 0.75)
 
 class Ice(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)

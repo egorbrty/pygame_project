@@ -33,16 +33,18 @@ class Enemy(pygame.sprite.Sprite):
         self.v_x = 0
         self.v_y = 0
 
-    def hit(self, hero_hit, hero_crit, hero_dexterity, hero_accuracy):
-        # Показатели главного героя, высота, в которую попала пуля
-        pass
-
-    def get_hit(self):
-        pass
+    def get_hit(self, damage):
         # Получение урона
+        self.process = [3, 0]
+        self.hp -= damage
+        if not self.is_alive():
+            self.die_2()
 
     def is_alive(self):
         return self.hp > 0
+
+    def die(self):
+        self.kill()
 
 
 class BattleDroid(Enemy):
@@ -64,11 +66,79 @@ class BattleDroid(Enemy):
         going_mas_right.append(pygame.transform.flip(image, True, False))
     run_width, run_height = sizes
 
+    hit_mas_right = []
+    hit_mas_left = []
+
+    for i in range(7):
+        image = load_image(f"data/pictures/battle droid/hit/hit{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        hit_mas_left.append(image)
+        hit_mas_right.append(pygame.transform.flip(image, True, False))
+
+    die_1_mas_right = []
+    die_1_mas_left = []
+
+    for i in range(8):
+        image = load_image(f"data/pictures/battle droid/die_1/die{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        die_1_mas_left.append(image)
+        die_1_mas_right.append(pygame.transform.flip(image, True, False))
+
     def update(self, camera, textures):
         if self.left:
             self.v_x = -BATTLE_DROID_SPEED
         else:
             self.v_x = BATTLE_DROID_SPEED
+
+        if self.process[0] == 3:
+            self.process[1] += 10 / fps
+
+            if int(self.process[1]) == len(self.hit_mas_right):
+                self.process[0] = 0
+                self.image = self.going_mas_right[0]
+                self.rect.height = self.image.get_rect().height
+
+            elif self.left:
+                self.image = self.hit_mas_left[int(self.process[1])]
+            else:
+                self.image = self.hit_mas_right[int(self.process[1])]
+
+            self.rect.height = self.image.get_rect().height
+            if self.onGround:
+                self.rect.bottom = self.onGround
+
+            self.v_y += GRAVITY / fps
+            self.onGround = False
+            self.rect.y += self.v_y / fps
+            self.check_collide_y(self.v_y, textures)
+
+            camera.move_camera(self)
+            return
+
+        if self.process[0] == -2:
+            self.process[1] += 10 / fps
+
+            if self.process[1] < len(self.die_1_mas_left):
+                if self.left:
+                    self.image = self.die_1_mas_left[int(self.process[1])]
+                else:
+                    self.image = self.die_1_mas_right[int(self.process[1])]
+            elif self.process[1] > len(self.die_1_mas_left) * 2:
+                self.kill()
+
+            bottom = self.rect.bottom
+            self.rect.height = self.image.get_rect().height
+            self.rect.bottom = bottom
+
+            camera.move_camera(self)
+
+            return
 
         if self.process[0] == 0:
             self.process[1] += 5 / fps
@@ -125,4 +195,5 @@ class BattleDroid(Enemy):
                 self.mas_stand.append(texture)
 
     def die_2(self):
-        self.kill()
+        self.process = [-2, 0]
+
