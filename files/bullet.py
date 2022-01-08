@@ -42,7 +42,6 @@ class Bullet(pygame.sprite.Sprite):
         else:
             self.rect.x += 1000 / fps
 
-
         camera.move_camera(self)
 
         for texture in textures:
@@ -61,5 +60,7 @@ class Bullet(pygame.sprite.Sprite):
                             print('critical')
                             damage *= 2
                         person.get_hit(damage)
+                    else:
+                        print('Промах!')
                 break
 

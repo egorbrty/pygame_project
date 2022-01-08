@@ -90,6 +90,11 @@ class BattleDroid(Enemy):
         die_1_mas_left.append(image)
         die_1_mas_right.append(pygame.transform.flip(image, True, False))
 
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos):
+        super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos)
+
+        self.height = BATTLE_DROID_HEIGHT
+
     def update(self, camera, textures):
         if self.left:
             self.v_x = -BATTLE_DROID_SPEED

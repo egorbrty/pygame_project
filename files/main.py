@@ -7,9 +7,10 @@ from camera import Camera
 from textures import Stone, Grass, Sand, Ice
 from enemies import BattleDroid
 from bullet import Bullet
+from hp_scale import Scale
 
 pygame.init()
-pygame.display.set_caption('Star World')
+pygame.display.set_caption('Space wars')
 screen = pygame.display.set_mode(size)
 
 
@@ -532,6 +533,9 @@ class Field:
 
         self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos)
         self.main_hero_sprite.add(self.main_hero)
+
+        self.main_hero_scale_hp = Scale(self.main_hero)
+
         f.close()
 
     def replay(self):
@@ -548,6 +552,8 @@ class Field:
             sprite = BattleDroid(self.persons_sprites, *self.persons_a, *i)
             self.persons_sprites.add(sprite)
 
+        self.main_hero_scale_hp.replay()
+
     def update(self, left, right, up, space):
         self.main_hero_sprite.update(left, right, up, space)
         self.persons_sprites.update(camera, field.textures_mas)
@@ -558,6 +564,11 @@ class Field:
         self.textures_sprites.draw(screen)
         self.main_hero_bullet_sprites.draw(screen)
         self.main_hero_sprite.draw(screen)
+
+        for i in self.persons_sprites:
+            health_scale(screen, i)
+
+        self.main_hero_scale_hp.update(screen)
 
     def move_camera_back(self):
         for sprite in self.main_hero_sprite:

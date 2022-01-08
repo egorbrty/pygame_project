@@ -3,6 +3,22 @@ import sys
 import pygame
 
 
+SIZE_OF_BLOCK = 150
+
+MAIN_HERO_HEIGHT = 100
+MAIN_HERO_SPEED = 400
+
+BATTLE_DROID_HEIGHT = 75
+BATTLE_DROID_SPEED = 125
+
+fps = 90
+GRAVITY = 2000
+JUMP = 1150
+scale_width = 100
+
+size = width, height = 1350, 700
+
+
 def load_image(name, colorkey=None):
     # если файл не существует, то выходим
     if not os.path.isfile(name):
@@ -28,15 +44,22 @@ def hit(x, y):
     return True
 
 
-SIZE_OF_BLOCK = 150
+def health_scale(screen, target):
+    '''Отображает шкалу здоровья цели'''
+    if target.is_alive():
+        pygame.draw.rect(screen, (100, 100, 100),
+                         ((target.rect.x + target.rect.width // 2 - scale_width // 2,
+                           target.rect.bottom - target.height - 20),
+                          (scale_width, 5)),
+                         0)
+        green = 255 / target.start_hp * target.hp
+        red = 255 - green
 
-MAIN_HERO_HEIGHT = 100
-MAIN_HERO_SPEED = 400
+        color = (red, green, 0)  # Цвет шкалы здоровья
+        pygame.draw.rect(screen, color,
+                         ((target.rect.x + target.rect.width // 2 - scale_width // 2,
+                           target.rect.bottom - target.height - 20),
+                          (scale_width / target.start_hp * target.hp, 5)),
+                         0)
 
-BATTLE_DROID_HEIGHT = 75
-BATTLE_DROID_SPEED = 125
 
-fps = 90
-GRAVITY = 2000
-JUMP = 1150
-size = width, height = 1350, 700
