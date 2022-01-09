@@ -1,5 +1,4 @@
 from functions import *
-from pygame import Rect
 
 
 class Camera:

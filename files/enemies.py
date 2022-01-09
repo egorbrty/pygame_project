@@ -1,5 +1,4 @@
 from functions import *
-import pygame
 
 
 pygame.init()
@@ -7,7 +6,7 @@ screen = pygame.display.set_mode(size)
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos):
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand):
         # Группа, здоровье, броня, сила удара, вероятность критического урона, ловкость, меткость, позиция
         # Метод вызывается, когда в персонажа попала пуля
         super().__init__(group)
@@ -21,9 +20,10 @@ class Enemy(pygame.sprite.Sprite):
         self.process = [0, 0]
         self.image = self.going_mas_right[0]
         self.left = False
+        self.stand = stand  # Стоит враг или бегает
 
         self.rect = self.image.get_rect()
-        self.rect.x = x_pos * SIZE_OF_BLOCK
+        self.rect.x = x_pos * SIZE_OF_BLOCK + SIZE_OF_BLOCK // 2 - self.image.get_rect().width // 2
         self.rect.bottom = y_pos * SIZE_OF_BLOCK + SIZE_OF_BLOCK
 
         self.onGround = True
@@ -90,13 +90,22 @@ class BattleDroid(Enemy):
         die_1_mas_left.append(image)
         die_1_mas_right.append(pygame.transform.flip(image, True, False))
 
-    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos):
-        super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos)
+    stand_left = load_image(f"data/pictures/battle droid/stand.png", -1)
+    image_rect = stand_left.get_rect()
+    sizes = (image_rect.width * koeff, image_rect.height * koeff)
+    stand_left = pygame.transform.scale(stand_left, sizes)
+    stand_right = pygame.transform.flip(stand_left, True, False)
+
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand):
+        super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand)
 
         self.height = BATTLE_DROID_HEIGHT
 
     def update(self, camera, textures):
-        if self.left:
+        if self.stand:
+            self.v_x = 0
+
+        elif self.left:
             self.v_x = -BATTLE_DROID_SPEED
         else:
             self.v_x = BATTLE_DROID_SPEED
@@ -145,7 +154,13 @@ class BattleDroid(Enemy):
 
             return
 
-        if self.process[0] == 0:
+        if self.stand:
+            if self.left:
+                self.image = self.stand_left
+            else:
+                self.image = self.stand_right
+
+        elif self.process[0] == 0:
             self.process[1] += 5 / fps
             if int(self.process[1]) == len(self.going_mas_right):
                 self.process[1] = 0

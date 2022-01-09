@@ -1,13 +1,10 @@
-import pygame
-import os
-import sys
-import random
 from functions import *
 from camera import Camera
-from textures import Stone, Grass, Sand, Ice
+from textures import *
 from enemies import BattleDroid
 from bullet import Bullet
 from hp_scale import Scale
+
 
 pygame.init()
 pygame.display.set_caption('Space wars')
@@ -518,8 +515,18 @@ class Field:
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
+                elif line[j] == '6':
+                    sprite = Platform(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+
                 elif line[j] == '8':
                     sprite = Ice(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+
+                elif line[j] == '9':
+                    sprite = BreakingWall(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
@@ -527,9 +534,14 @@ class Field:
                     main_hero_pos = (j, i)
 
                 elif line[j] == 'A':
-                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i)
+                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, False)
                     self.persons_sprites.add(sprite)
-                    self.start_position_a.append((j, i))
+                    self.start_position_a.append(((j, i), False))
+
+                elif line[j] == 'a':
+                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, True)
+                    self.persons_sprites.add(sprite)
+                    self.start_position_a.append(((j, i), True))
 
         self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos)
         self.main_hero_sprite.add(self.main_hero)
@@ -545,11 +557,11 @@ class Field:
         self.main_hero.replay()
         for i in self.main_hero_bullet_sprites:
             i.kill()
-        for i in self.textures_sprites:
-            i.replay()
+        for i in self.textures_mas:
+            i.replay(self.textures_sprites)
 
         for i in self.start_position_a:
-            sprite = BattleDroid(self.persons_sprites, *self.persons_a, *i)
+            sprite = BattleDroid(self.persons_sprites, *self.persons_a, *i[0], i[1])
             self.persons_sprites.add(sprite)
 
         self.main_hero_scale_hp.replay()

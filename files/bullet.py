@@ -1,5 +1,4 @@
 from functions import *
-import pygame
 
 
 pygame.init()
@@ -47,6 +46,7 @@ class Bullet(pygame.sprite.Sprite):
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):
                 self.kill()
+                texture.shot()
                 break
 
         for person in persons:

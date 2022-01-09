@@ -1,5 +1,4 @@
 from functions import *
-from pygame import draw
 
 
 class Scale:
@@ -23,12 +22,13 @@ class Scale:
                             0)
 
         self.value -= (self.value - self.width * self.target.hp / self.target.start_hp) * 0.05
-        pygame.draw.polygon(screen, (200, 200, 200),
-                            ((self.pos[0], self.pos[1] - 2),
-                             (self.pos[0] + self.value, self.pos[1] - 2),
-                             (self.pos[0] - 10 + self.value, self.pos[1] + self.height + 2),
-                             (self.pos[0] - 10, self.pos[1] + self.height + 2)),
-                            0)
+        if self.value > 0:
+            pygame.draw.polygon(screen, (200, 200, 200),
+                                ((self.pos[0], self.pos[1] - 2),
+                                 (self.pos[0] + self.value, self.pos[1] - 2),
+                                 (self.pos[0] - 10 + self.value, self.pos[1] + self.height + 2),
+                                 (self.pos[0] - 10, self.pos[1] + self.height + 2)),
+                                0)
 
         if self.target.hp > 0:
             green = 255 / self.target.start_hp * self.target.hp
