@@ -1,259 +1,659 @@
 import pygame
+import random
+import os
+import time
 
+
+WIDTH = 1350
+HEIGHT = 700
+FPS = 30
+
+# Задаем цвета
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+#распаковка переменных из БД
+#f = open("123.txt", "r")
 
 flag = 0
+s1 = s2 = s3 = s4 = s5 = s6 = 0
 
-class Board:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.board = [[0] * width for _ in range(height)]
-        self.left = 10
-        self.top = 10
-        self.x_1 = 30
-        self.y_1 = 30
+money = 100
+prise1 = 10
+prise2 = 10
+prise3 = 10
+prise4 = 10
+prise5 = 10
+prise6 = 10
 
- 
-    def set_view1(self, left1, top1, x_1, y_1):
-        self.left1 = left1
-        self.top1 = top1
-        self.x_1 = x_1
-        self.y_1 = y_1
+class knopka1(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka1_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, 350)
 
-
-    def set_view2(self, left2, top2, x_2, y_2):
-        self.left2 = left2
-        self.top2 = top2
-        self.x_2 = x_2
-        self.y_2 = y_2
-
-
-    def set_view3(self, left3, top3, x_3, y_3):
-        self.left3 = left3
-        self.top3 = top3
-        self.x_3 = x_3
-        self.y_3 = y_3
-
-
-    def set_view_live(self, left11, top11, x_11, y_11):
-        self.left11 = left11
-        self.top11 = top11
-        self.x_11 = x_11
-        self.y_11 = y_11
-
-
-    def set_view_prot(self, left12, top12, x_12, y_12):
-        self.left12 = left12
-        self.top12 = top12
-        self.x_12 = x_12
-        self.y_12 = y_12
-
-
-    def set_view_power(self, left13, top13, x_13, y_13):
-        self.left13 = left13
-        self.top13 = top13
-        self.x_13 = x_13
-        self.y_13 = y_13
-
-
-    def set_view_crit(self, left14, top14, x_14, y_14):
-        self.left14 = left14
-        self.top14 = top14
-        self.x_14 = x_14
-        self.y_14 = y_14
-
-
-    def set_view_out(self, left0, top0, x_0, y_0):
-        self.left0 = left0
-        self.top0 = top0
-        self.x_0 = x_0
-        self.y_0 = y_0
-
-
-##    def set_view4(self, left4, top4, x_4, y_4):
-##        self.left4 = left4
-##        self.top4 = top4
-##        self.x_4 = x_4
-##        self.y_4 = y_4
-        
-
-    def render(self, surface):
-        wcolor = pygame.Color("white")
-        if flag == 0:
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left1 + self.x_1 * j, self.top1 + self.y_1 * i,
-                                      self.x_1, self.y_1),
-                                     1 if self.board[i][j] == 0 else 0)
-            wcolor = pygame.Color("white")
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left2 + self.x_2 * j, self.top2 + self.y_2 * i,
-                                      self.x_2, self.y_2),
-                                     1 if self.board[i][j] == 0 else 0)
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left3 + self.x_3 * j, self.top3 + self.y_3 * i,
-                                      self.x_3, self.y_3),
-                                     1 if self.board[i][j] == 0 else 0)
-        elif flag == 1:
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left11 + self.x_11 * j, self.top11 + self.y_11 * i,
-                                      self.x_11, self.y_11),
-                                     1 if self.board[i][j] == 0 else 0)
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left12 + self.x_12 * j, self.top12 + self.y_12 * i,
-                                      self.x_12, self.y_12),
-                                     1 if self.board[i][j] == 0 else 0)
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left13 + self.x_13 * j, self.top13 + self.y_13 * i,
-                                      self.x_13, self.y_13),
-                                     1 if self.board[i][j] == 0 else 0)
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left14 + self.x_14 * j, self.top14 + self.y_14 * i,
-                                      self.x_14, self.y_14),
-                                     1 if self.board[i][j] == 0 else 0)
-            for i in range(self.height):
-                for j in range(self.width):
-                    pygame.draw.rect(surface, wcolor,
-                                     (self.left0 + self.x_0 * j, self.top0 + self.y_0 * i,
-                                      self.x_0, self.y_0),
-                                     1 if self.board[i][j] == 0 else 0)
-##        for i in range(self.height):
-##            for j in range(self.width):
-##                pygame.draw.rect(surface, wcolor,
-##                                 (self.left4 + self.x_4 * j, self.top4 + self.y_4 * i,
-##                                  self.x_4, self.y_4),
-##                                 1 if self.board[i][j] == 0 else 0)
-
- 
-    def get_click(self, mouse_pos):
-        cell_coords = self.get_cell(mouse_pos)
-        if cell_coords is None:
-            return
- 
-        self.on_click(cell_coords)
-        
- 
-    def get_cell(self, mouse_pos):
-        board_width = self.width * self.x_1
-        board_height = self.height * self.y_1
-        if self.left1 < mouse_pos[0] < self.left1 + board_width:
-            if self.top1 < mouse_pos[1] < self.top1 + board_height:
-                cell_coords = (mouse_pos[1] - self.left1) // self.x_1,
-                (mouse_pos[0] - self.top1) // self.y_1
-                return cell_coords
-        return None
-    
- 
-    def on_click(self, cell_coords):
+    def update(self, *args):
         global flag
-        if flag == 0:
-    ##        if cell_coords[0] > self.left4 and cell_coords[0] < self.x_4 + self.left4:
-    ##            if cell_coords[1] > self.top4 and cell_coords[1] < self.y_4 + self.top4:
-    ##                print("кнопка1")
-            if cell_coords[0] > self.left3 and cell_coords[0] < self.x_3 + self.left3:
-                if cell_coords[1] > self.top3 and cell_coords[1] < self.y_3 + self.top3:
-                    print("кнопка1")
-                    flag = 1
-            if cell_coords[0] > self.left2 and cell_coords[0] < self.x_2 + self.left2:
-                if cell_coords[1] > self.top2 and cell_coords[1] < self.y_2 + self.top2:
-                    print("кнопка2")
-            if cell_coords[0] > self.left1 and cell_coords[0] < self.x_1 + self.left1:
-                if cell_coords[1] > self.top1 and cell_coords[1] < self.y_1 + self.top1:
-                    print("кнопка3")
-        elif flag == 1:
-            if cell_coords[0] > self.left11 and cell_coords[0] < self.x_11 + self.left11:
-                if cell_coords[1] > self.top11 and cell_coords[1] < self.y_11 + self.top11:
-                    print("кнопкаlive")
-            if cell_coords[0] > self.left12 and cell_coords[0] < self.x_12 + self.left12:
-                if cell_coords[1] > self.top12 and cell_coords[1] < self.y_12 + self.top12:
-                    print("кнопкаprot")
-            if cell_coords[0] > self.left13 and cell_coords[0] < self.x_13 + self.left13:
-                if cell_coords[1] > self.top13 and cell_coords[1] < self.y_13 + self.top13:
-                    print("кнопкаpower")
-            if cell_coords[0] > self.left14 and cell_coords[0] < self.x_14 + self.left14:
-                if cell_coords[1] > self.top14 and cell_coords[1] < self.y_14 + self.top14:
-                    print("кнопкаcrit")
-            if cell_coords[0] > self.left0 and cell_coords[0] < self.x_0 + self.left0:
-                if cell_coords[1] > self.top0 and cell_coords[1] < self.y_0 + self.top0:
-                    print("кнопкаout")
-                    flag = 0
-    
+        
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (310, 90))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH / 2, 350)
+        else:
+            self.image = knopka1_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH / 2, 350)
             
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            flag = 1
+            time.sleep(0.2)
+
+
+class knopka2(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka2_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, 450)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (310, 90))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH / 2, 450)
+        else:
+            self.image = knopka2_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH / 2, 450)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            flag = 2
+            time.sleep(0.2)
+        
+
+class knopka3(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka3_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, 550)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (310, 90))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH / 2, 550)
+        else:
+            self.image = knopka3_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH / 2, 550)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            time.sleep(0.2)
+
+
+class knopka4(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka4_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 7, HEIGHT // 2)
+
+    def update(self, *args):
+        global flag, s1, money, prise1
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (185, 260))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7, HEIGHT // 2)
+        else:
+            self.image = knopka4_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7, HEIGHT // 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            if money >= prise1:
+                s1 += 1
+                money -= prise1
+                time.sleep(0.22)
+
+
+class knopka5(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka5_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 7 * 2, HEIGHT // 2)
+
+    def update(self, *args):
+        global flag, s2, money, prise2
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (185, 260))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 2, HEIGHT // 2)
+        else:
+            self.image = knopka5_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 2, HEIGHT // 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            if money >= prise2:
+                s2 += 1
+                money -= prise2
+                time.sleep(0.22)
+
+
+class knopka6(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka6_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 7 * 3, HEIGHT // 2)
+
+    def update(self, *args):
+        global flag, s3, money, prise3
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (185, 260))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 3, HEIGHT // 2)
+        else:
+            self.image = knopka6_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 3, HEIGHT // 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            if money >= prise3:
+                s3 += 1
+                money -= prise3
+                time.sleep(0.22)
+
+
+class knopka7(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka7_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 7 * 4, HEIGHT // 2)
+
+    def update(self, *args):
+        global flag, s4, money, prise4
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (185, 260))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 4, HEIGHT // 2)
+        else:
+            self.image = knopka7_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 4, HEIGHT // 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            if money >= prise4:
+                s4 += 1
+                money -= prise4
+                time.sleep(0.22)
+
+
+class knopka8(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka8_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 7 * 5, HEIGHT // 2)
+
+    def update(self, *args):
+        global flag, s5, money, prise5
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (185, 260))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 5, HEIGHT // 2)
+        else:
+            self.image = knopka8_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 5, HEIGHT // 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            if money >= prise5:
+                s5 += 1
+                money -= prise5
+                time.sleep(0.22)
+
+
+class knopka9(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka9_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 7 * 6, HEIGHT // 2)
+
+    def update(self, *args):
+        global flag, s6, money, prise6
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (185, 260))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 6, HEIGHT // 2)
+        else:
+            self.image = knopka9_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 7 * 6, HEIGHT // 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            if money >= prise6:
+                s6 += 1
+                money -= prise6
+                time.sleep(0.22)
+
+
+class star_world(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = star_world_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 2, 175)
+
+
+class knopkaout(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopkaout_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.topright = (WIDTH, 0)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (80, 80))
+            self.rect = self.image.get_rect()
+            self.rect.topright = (WIDTH, 0)
+        else:
+            self.image = knopkaout_img
+            self.rect = self.image.get_rect()
+            self.rect.topright = (WIDTH, 0)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            flag = 0
+
+
+class skrin1(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = skrin1_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+
+##    def update(self, *args):
+##        global flag, flag2
+##        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+##                self.rect.collidepoint(args[0].pos):
+##            print(123)
+
+
+class knopka11(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka11_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5, HEIGHT // 3)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5, HEIGHT // 3)
+        else:
+            self.image = knopka11_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5, HEIGHT // 3)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka12(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka12_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3)
+        else:
+            self.image = knopka12_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka13(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka13_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3)
+        else:
+            self.image = knopka13_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka14(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka14_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3)
+        else:
+            self.image = knopka14_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka15(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka15_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5, HEIGHT // 3 * 2)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 1, HEIGHT // 3 * 2)
+        else:
+            self.image = knopka15_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 1, HEIGHT // 3 * 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka16(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka16_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3 * 2)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3 * 2)
+        else:
+            self.image = knopka16_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3 * 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka17(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka17_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3 * 2)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3 * 2)
+        else:
+            self.image = knopka17_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3 * 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+class knopka18(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = knopka18_img
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3 * 2)
+
+    def update(self, *args):
+        global flag
+        if args and args[0].type == pygame.MOUSEMOTION and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = pygame.transform.scale(self.image, (210, 210))
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3 * 2)
+        else:
+            self.image = knopka18_img
+            self.rect = self.image.get_rect()
+            self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3 * 2)
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            print(4)
+
+
+# Создаем игру и окно
 pygame.init()
-fps = 20
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Star world")
 clock = pygame.time.Clock()
-size = 1350, 700
-screen = pygame.display.set_mode(size)
-##board = Board(1, 1)
-##board.set_view1(100, 400, 300, 50)
-##board.set_view2(100, 300, 300, 50)
-##board.set_view3(100, 200, 300, 50)
-##board.set_view4(100, 100, 300, 50)
+
+# настройка папки ассетов
+game_folder = os.path.dirname(__file__)
+img_folder = os.path.join(game_folder, 'data')
+
+skrin1_img = pygame.image.load(os.path.join(img_folder, 'skrin1.png')).convert()
+
+knopka1_img = pygame.image.load(os.path.join(img_folder, 'knopka1.png')).convert()
+knopka2_img = pygame.image.load(os.path.join(img_folder, 'knopka2.png')).convert()
+knopka3_img = pygame.image.load(os.path.join(img_folder, 'knopka3.png')).convert()
+knopka4_img = pygame.image.load(os.path.join(img_folder, 'knopka4.png')).convert()
+knopka5_img = pygame.image.load(os.path.join(img_folder, 'knopka5.png')).convert()
+knopka6_img = pygame.image.load(os.path.join(img_folder, 'knopka6.png')).convert()
+knopka7_img = pygame.image.load(os.path.join(img_folder, 'knopka7.png')).convert()
+knopka8_img = pygame.image.load(os.path.join(img_folder, 'knopka8.png')).convert()
+knopka9_img = pygame.image.load(os.path.join(img_folder, 'knopka9.png')).convert()
+
+knopka11_img = pygame.image.load(os.path.join(img_folder, 'knopka11.png')).convert()
+knopka12_img = pygame.image.load(os.path.join(img_folder, 'knopka12.png')).convert()
+knopka13_img = pygame.image.load(os.path.join(img_folder, 'knopka13.png')).convert()
+knopka14_img = pygame.image.load(os.path.join(img_folder, 'knopka14.png')).convert()
+knopka15_img = pygame.image.load(os.path.join(img_folder, 'knopka15.png')).convert()
+knopka16_img = pygame.image.load(os.path.join(img_folder, 'knopka16.png')).convert()
+knopka17_img = pygame.image.load(os.path.join(img_folder, 'knopka17.png')).convert()
+knopka18_img = pygame.image.load(os.path.join(img_folder, 'knopka18.png')).convert()
+
+knopkaout_img = pygame.image.load(os.path.join(img_folder, 'knopkaout.png')).convert()
+star_world_img = pygame.image.load(os.path.join(img_folder, 'star_world.png')).convert()
+
+
+skrin1 = skrin1()
+knopka1 = knopka1()
+knopka2 = knopka2()
+knopka3 = knopka3()
+knopka4 = knopka4()
+knopka5 = knopka5()
+knopka6 = knopka6()
+knopka7 = knopka7()
+knopka8 = knopka8()
+knopka9 = knopka9()
+knopkaout = knopkaout()
+star_world = star_world()
+knopka11 = knopka11()
+knopka12 = knopka12()
+knopka13 = knopka13()
+knopka14 = knopka14()
+knopka15 = knopka15()
+knopka16 = knopka16()
+knopka17 = knopka17()
+knopka18 = knopka18()
+
+all_sprites = pygame.sprite.Group()
+all_sprites.add(skrin1, star_world, knopka1, knopka2, knopka3)
+
+all_sprites2 = pygame.sprite.Group()
+all_sprites2.add(skrin1, knopka4, knopka5, knopka6, knopka7, knopka8, knopka9, knopkaout)
+
+all_sprites3 = pygame.sprite.Group()
+all_sprites3.add(skrin1, knopka11, knopka12, knopka13, knopka14,
+                 knopka15, knopka16, knopka17, knopka18, knopkaout)
+
+# Цикл игры
 running = True
 while running:
-    if flag == 0:   
-        screen.fill((0, 0, 0))
-        font = pygame.font.Font(None, 50)
-        board = Board(1, 1)
+    clock.tick(FPS)
+    if flag == 0:
+        # Ввод процесса (события)
+        for event in pygame.event.get():
+            # check for closing window
+            if event.type == pygame.QUIT:
+                running = False
 
-        board.set_view3(425, 400, 500, 75)
-        text = font.render("Магазин", True, (100, 255, 100))
-        screen.blit(text, (595, 420))
-        board.set_view2(425, 500, 500, 75)
-        text = font.render("Выбрать уровень", True, (100, 255, 100))
-        screen.blit(text, (540, 520))
-        board.set_view1(425, 600, 500, 75)
-        text = font.render("Продолжить историю", True, (100, 255, 100))
-        screen.blit(text, (490, 620))
-        #board.set_view4(425, 300, 500, 75)
-    elif flag == 1:
-        screen.fill((0, 0, 0))
-        font = pygame.font.Font(None, 50)
-        board = Board(1, 1)
-
-        board.set_view_live(200, 200, 200, 300)
-        text = font.render("Магазин", True, (100, 255, 100))
-        screen.blit(text, (595, 420))
-        board.set_view_prot(450, 200, 200, 300)
-        text = font.render("Магазин", True, (100, 255, 100))
-        screen.blit(text, (595, 420))
-        board.set_view_power(700, 200, 200, 300)
-        text = font.render("Магазин", True, (100, 255, 100))
-        screen.blit(text, (595, 420))
-        board.set_view_crit(950, 200, 200, 300)
-        text = font.render("Магазин", True, (100, 255, 100))
-        screen.blit(text, (595, 420))
-        board.set_view_out(1315, 10, 25, 25)
-        text = font.render("Магазин", True, (100, 255, 100))
-        screen.blit(text, (595, 420))
+        # Обновление
+        all_sprites.update(event)
         
-        #board.set_view4(425, 300, 500, 75)
-    for event in pygame.event.get():
-        f2 = flag
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            board.on_click(event.pos)
-##        if event.type == pygame.MOUSEMOTION:
-##            pygame.draw.circle(screen, (0, 0, 255), event.pos, 20)
-##        screen.fill((0, 0, 0))
-        if f2 == flag:
-            board.render(screen)
-            pygame.display.flip()
-            clock.tick(fps)
-        else:
-            break
+        # Рендеринг
+        screen.fill(BLACK)
+        all_sprites.draw(screen)
+        # После отрисовки всего, переворачиваем экран
+        pygame.display.flip()
+    elif flag == 1:
+        font = pygame.font.Font(None, 50)
+        
+        # Ввод процесса (события)
+        for event in pygame.event.get():
+            # check for closing window
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Обновление
+        all_sprites2.update(event)
+        
+        # Рендеринг
+        screen.fill(BLACK)
+        all_sprites2.draw(screen)
+
+        text = font.render("ур. " + str(s1), True, (255, 50, 50))
+        screen.blit(text, (WIDTH // 7 - 50, HEIGHT // 2 - 200))
+        text = font.render("ур. " + str(s2), True, (255, 50, 50))
+        screen.blit(text, (WIDTH // 7 * 2 - 50, HEIGHT // 2 - 200))
+        text = font.render("ур. " + str(s3), True, (255, 50, 50))
+        screen.blit(text, (WIDTH // 7 * 3 - 50, HEIGHT // 2 - 200))
+        text = font.render("ур. " + str(s4), True, (255, 50, 50))
+        screen.blit(text, (WIDTH // 7 * 4 - 50, HEIGHT // 2 - 200))
+        text = font.render("ур. " + str(s5), True, (255, 50, 50))
+        screen.blit(text, (WIDTH // 7 * 5 - 50, HEIGHT // 2 - 200))
+        text = font.render("ур. " + str(s6), True, (255, 50, 50))
+        screen.blit(text, (WIDTH // 7 * 6 - 50, HEIGHT // 2 - 200))
+
+        text = font.render("    " + str(prise1), True, (255, 255, 50))
+        screen.blit(text, (WIDTH // 7 - 50, HEIGHT // 2 + 150))
+        text = font.render("    " + str(prise2), True, (255, 255, 50))
+        screen.blit(text, (WIDTH // 7 * 2 - 50, HEIGHT // 2 + 150))
+        text = font.render("    " + str(prise3), True, (255, 255, 50))
+        screen.blit(text, (WIDTH // 7 * 3 - 50, HEIGHT // 2 + 150))
+        text = font.render("    " + str(prise4), True, (255, 255, 50))
+        screen.blit(text, (WIDTH // 7 * 4 - 50, HEIGHT // 2 + 150))
+        text = font.render("    " + str(prise5), True, (255, 255, 50))
+        screen.blit(text, (WIDTH // 7 * 5 - 50, HEIGHT // 2 + 150))
+        text = font.render("    " + str(prise6), True, (255, 255, 50))
+        screen.blit(text, (WIDTH // 7 * 6 - 50, HEIGHT // 2 + 150))
+
+        text = font.render(str(money), True, (255, 255, 0))
+        screen.blit(text, (10, 10))
+        
+        # После отрисовки всего, переворачиваем экран
+        pygame.display.flip()
+    elif flag == 2:
+        # Ввод процесса (события)
+        for event in pygame.event.get():
+            # check for closing window
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Обновление
+        all_sprites3.update(event)
+        
+        # Рендеринг
+        screen.fill(BLACK)
+        all_sprites3.draw(screen)
+        # После отрисовки всего, переворачиваем экран
+        pygame.display.flip()
+
 pygame.quit()
