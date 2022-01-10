@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+import random
 
 
 SIZE_OF_BLOCK = 150
@@ -17,6 +18,15 @@ JUMP = 1150
 scale_width = 100
 
 size = width, height = 1350, 700
+
+
+pygame.init()
+pygame.font.init()
+pygame.display.set_caption('Space wars')
+screen = pygame.display.set_mode(size)
+
+
+main_hero_parameters = [100, 100, 25, 200, 100, 900]
 
 
 def load_image(name, colorkey=None):
@@ -36,12 +46,16 @@ def load_image(name, colorkey=None):
 
 
 def hit(x, y):
+    return True
     """При ударе в функцию поступает информация о вероятности критического удара врага и броне гравного персонажа.
     Функция на основе генератора псевдослучайнгых чисел определяет, попал ли враг по персонажу. Если True, то функция
     вызывается вновь и определяет, критический удар или нет
     Первый аргумент - меткость или вероятность критического удара
     Второй аргумент - ловкость или броня"""
-    return True
+    chance = x / y * 10
+    x = random.randint(1, 100)
+    print(chance, x)
+    return x <= chance
 
 
 def health_scale(screen, target):

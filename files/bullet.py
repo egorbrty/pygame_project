@@ -1,4 +1,5 @@
 from functions import *
+from message import Message
 
 
 pygame.init()
@@ -30,7 +31,7 @@ class Bullet(pygame.sprite.Sprite):
 
         self.stop = False
 
-    def update(self, camera, textures, persons):
+    def update(self, camera, textures, persons, messages):
         if self.stop:
             # Попадание
             self.kill()
@@ -54,13 +55,15 @@ class Bullet(pygame.sprite.Sprite):
                 if pygame.sprite.collide_mask(self, person):
                     self.stop = True
                     if hit(self.accuracy, person.dexterity):
-                        print('Попадание')
                         damage = self.hit
                         if hit(self.crit, person.armor):
-                            print('critical')
+                            messages.add('Критический',
+                                         (255, 0, 0),
+                                         person.rect.x + person.rect.width // 2,
+                                         person.rect.y)
                             damage *= 2
                         person.get_hit(damage)
                     else:
-                        print('Промах!')
+                        messages.add('Мимо!', (0, 0, 255), person.rect.x + person.rect.width, person.rect.y)
                 break
 

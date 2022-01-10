@@ -7,9 +7,15 @@ class Camera:
         self.x = 0
         self.y = 0
 
+        self.last_x = 0
+        self.last_y = 0
+
     def update(self, target, level_width, level_height):
         center_x = target.rect.x + SIZE_OF_BLOCK // 2
         center_y = target.rect.bottom - SIZE_OF_BLOCK // 2
+
+        self.last_x = self.x
+        self.last_y = self.y
 
         self.x = width // 2 - center_x
         self.y = height // 2 - center_y
@@ -31,3 +37,7 @@ class Camera:
     def move_back(self, obj):
         obj.rect.x -= self.x
         obj.rect.y -= self.y
+
+    def get_delta(self):
+        return self.last_x - self.x, self.last_y - self.y
+

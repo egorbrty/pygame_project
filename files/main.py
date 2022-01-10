@@ -4,11 +4,7 @@ from textures import *
 from enemies import BattleDroid
 from bullet import Bullet
 from hp_scale import Scale
-
-
-pygame.init()
-pygame.display.set_caption('Space wars')
-screen = pygame.display.set_mode(size)
+from message import Message
 
 
 class MainHero(pygame.sprite.Sprite):
@@ -469,7 +465,7 @@ class Field:
         pass
 
     def start_game(self, map_name):
-        self.main_hero_parameters = [100, 1, 25, 0, 0, 0]
+        self.main_hero_parameters = main_hero_parameters
         f = open(map_name)
         self.map_name = map_name
 
@@ -478,6 +474,7 @@ class Field:
 
         self.persons_sprites = pygame.sprite.Group()
         self.textures_sprites = pygame.sprite.Group()
+        self.messages = Message()
 
         self.persons_a = list(map(int, f.readline().split()))
         self.persons_b = list(map(int, f.readline().split()))
@@ -564,13 +561,15 @@ class Field:
             sprite = BattleDroid(self.persons_sprites, *self.persons_a, *i[0], i[1])
             self.persons_sprites.add(sprite)
 
+        self.messages.replay()
+
         self.main_hero_scale_hp.replay()
 
     def update(self, left, right, up, space):
         self.main_hero_sprite.update(left, right, up, space)
         self.persons_sprites.update(camera, field.textures_mas)
         self.textures_sprites.update(camera)
-        self.main_hero_bullet_sprites.update(camera, self.textures_sprites, self.persons_sprites)
+        self.main_hero_bullet_sprites.update(camera, self.textures_sprites, self.persons_sprites, self.messages)
 
         self.persons_sprites.draw(screen)
         self.textures_sprites.draw(screen)
@@ -579,6 +578,8 @@ class Field:
 
         for i in self.persons_sprites:
             health_scale(screen, i)
+
+        self.messages.draw(screen, camera)
 
         self.main_hero_scale_hp.update(screen)
 
