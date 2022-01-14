@@ -1,4 +1,7 @@
+import random
+
 from functions import *
+from enemies_bullet import *
 
 
 pygame.init()
@@ -33,6 +36,8 @@ class Enemy(pygame.sprite.Sprite):
         self.v_x = 0
         self.v_y = 0
 
+        self.finished = True
+
     def get_hit(self, damage):
         # Получение урона
         self.process = [3, 0]
@@ -45,6 +50,11 @@ class Enemy(pygame.sprite.Sprite):
 
     def die(self):
         self.kill()
+
+    def shoot(self):
+        if self.onGround and self.process[0] == 0:
+            self.process = [2, 0]
+        self.finished = False
 
 
 class BattleDroid(Enemy):
@@ -90,18 +100,38 @@ class BattleDroid(Enemy):
         die_1_mas_left.append(image)
         die_1_mas_right.append(pygame.transform.flip(image, True, False))
 
+    shoot_mas_right = []
+    shoot_mas_left = []
+
+    for i in range(8):
+        image = load_image(f"data/pictures/battle droid/shoot/shoot{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        shoot_mas_left.append(image)
+        shoot_mas_right.append(pygame.transform.flip(image, True, False))
+
     stand_left = load_image(f"data/pictures/battle droid/stand.png", -1)
     image_rect = stand_left.get_rect()
     sizes = (image_rect.width * koeff, image_rect.height * koeff)
     stand_left = pygame.transform.scale(stand_left, sizes)
     stand_right = pygame.transform.flip(stand_left, True, False)
 
-    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand):
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand, bullets):
         super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand)
 
         self.height = BATTLE_DROID_HEIGHT
+        self.bullets = bullets
+        self.last_shot = random.randint(0, fps * 5)
 
     def update(self, camera, textures):
+        self.last_shot += 1
+
+        if self.last_shot >= fps * 8:
+            self.shoot()
+            self.last_shot = 0
+
         if self.stand:
             self.v_x = 0
 
@@ -154,6 +184,25 @@ class BattleDroid(Enemy):
 
             return
 
+        if self.process[0] == 2:
+            self.process[1] += 3 / fps
+
+            if self.process[1] < len(self.shoot_mas_left):
+                if self.left:
+                    self.image = self.shoot_mas_left[int(self.process[1])]
+                else:
+                    self.image = self.shoot_mas_right[int(self.process[1])]
+                if not self.finished and int(self.process[1]) == 6:
+                    sprite = BattleDroidBullet(self.bullets, self.rect.x, self.rect.y, self.left, self)
+                    self.bullets.add(sprite)
+                    self.finished = True
+
+            else:
+                self.process = [0, 0]
+
+            camera.move_camera(self)
+            return
+
         if self.stand:
             if self.left:
                 self.image = self.stand_left
@@ -194,10 +243,12 @@ class BattleDroid(Enemy):
                 if v_x > 0:
                     self.rect.right = texture.rect.left
                     self.left = True
+                    self.shoot()
 
                 if v_x < 0:
                     self.rect.left = texture.rect.right
                     self.left = False
+                    self.shoot()
 
     def check_collide_y(self, v_y, textures):
         self.rect.y += 1

@@ -26,9 +26,6 @@ pygame.display.set_caption('Space wars')
 screen = pygame.display.set_mode(size)
 
 
-main_hero_parameters = [100, 100, 25, 200, 100, 900]
-
-
 def load_image(name, colorkey=None):
     # если файл не существует, то выходим
     if not os.path.isfile(name):
@@ -46,7 +43,6 @@ def load_image(name, colorkey=None):
 
 
 def hit(x, y):
-    return True
     """При ударе в функцию поступает информация о вероятности критического удара врага и броне гравного персонажа.
     Функция на основе генератора псевдослучайнгых чисел определяет, попал ли враг по персонажу. Если True, то функция
     вызывается вновь и определяет, критический удар или нет
@@ -54,7 +50,6 @@ def hit(x, y):
     Второй аргумент - ловкость или броня"""
     chance = x / y * 10
     x = random.randint(1, 100)
-    print(chance, x)
     return x <= chance
 
 

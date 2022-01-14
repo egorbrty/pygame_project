@@ -64,6 +64,9 @@ class Bullet(pygame.sprite.Sprite):
                             damage *= 2
                         person.get_hit(damage)
                     else:
-                        messages.add('Мимо!', (0, 0, 255), person.rect.x + person.rect.width, person.rect.y)
-                break
+                        messages.add('Мимо!',
+                                     (0, 0, 255),
+                                     person.rect.x + person.rect.width // 2,
+                                     person.rect.y)
+                        break
 
