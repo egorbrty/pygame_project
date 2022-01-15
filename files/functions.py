@@ -14,7 +14,7 @@ BATTLE_DROID_SPEED = 125
 
 fps = 90
 GRAVITY = 2000
-JUMP = 1150
+JUMP = 1100
 scale_width = 100
 
 size = width, height = 1350, 700

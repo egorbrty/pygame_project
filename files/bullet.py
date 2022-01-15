@@ -12,9 +12,11 @@ class Bullet(pygame.sprite.Sprite):
     image = load_image(r"data\pictures\clone\shoot\bullet.png", -1)
     image = pygame.transform.scale(image, sizes)
 
-    def __init__(self, group, x_position, y_position, hit, crit, accuracy, left):
+    def __init__(self, group, x_position, y_position, hit, crit, accuracy, left, money):
         super().__init__(group)
         self.image = Bullet.image
+
+        self.money = money
 
         self.x_position = x_position
         self.y_position = y_position
@@ -62,7 +64,7 @@ class Bullet(pygame.sprite.Sprite):
                                          person.rect.x + person.rect.width // 2,
                                          person.rect.y)
                             damage *= 2
-                        person.get_hit(damage)
+                        person.get_hit(damage, self.money)
                     else:
                         messages.add('Мимо!',
                                      (0, 0, 255),

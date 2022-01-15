@@ -9,7 +9,7 @@ screen = pygame.display.set_mode(size)
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand):
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, prize, x_pos, y_pos, stand):
         # Группа, здоровье, броня, сила удара, вероятность критического урона, ловкость, меткость, позиция
         # Метод вызывается, когда в персонажа попала пуля
         super().__init__(group)
@@ -24,6 +24,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = self.going_mas_right[0]
         self.left = False
         self.stand = stand  # Стоит враг или бегает
+        self.prize = prize
 
         self.rect = self.image.get_rect()
         self.rect.x = x_pos * SIZE_OF_BLOCK + SIZE_OF_BLOCK // 2 - self.image.get_rect().width // 2
@@ -38,11 +39,12 @@ class Enemy(pygame.sprite.Sprite):
 
         self.finished = True
 
-    def get_hit(self, damage):
+    def get_hit(self, damage, money):
         # Получение урона
         self.process = [3, 0]
         self.hp -= damage
         if not self.is_alive():
+            money += self.prize
             self.die_2()
 
     def is_alive(self):
@@ -118,8 +120,8 @@ class BattleDroid(Enemy):
     stand_left = pygame.transform.scale(stand_left, sizes)
     stand_right = pygame.transform.flip(stand_left, True, False)
 
-    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand, bullets):
-        super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, stand)
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, prize, x_pos, y_pos, stand, bullets):
+        super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, prize, x_pos, y_pos, stand)
 
         self.height = BATTLE_DROID_HEIGHT
         self.bullets = bullets
@@ -243,12 +245,10 @@ class BattleDroid(Enemy):
                 if v_x > 0:
                     self.rect.right = texture.rect.left
                     self.left = True
-                    self.shoot()
 
                 if v_x < 0:
                     self.rect.left = texture.rect.right
                     self.left = False
-                    self.shoot()
 
     def check_collide_y(self, v_y, textures):
         self.rect.y += 1

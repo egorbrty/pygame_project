@@ -6,6 +6,7 @@ from bullet import Bullet
 from hp_scale import Scale
 from message import Message
 from money import Money
+from finish import Cup
 
 
 class MainHero(pygame.sprite.Sprite):
@@ -93,12 +94,14 @@ class MainHero(pygame.sprite.Sprite):
     jump_image_right = image
     jump_image_left = pygame.transform.flip(image, True, False)
 
-    def __init__(self, group, start_hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos):
+    def __init__(self, group, start_hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, money):
         super().__init__(group)
         self.start_position_x = x_pos
         self.start_position_y = y_pos
         self.start_hp = start_hp
         self.hp = start_hp
+
+        self.money = money
 
         self.armor = armor
         self.hit = hit
@@ -295,7 +298,7 @@ class MainHero(pygame.sprite.Sprite):
                     sprite = Bullet(field.main_hero_bullet_sprites,
                                     self.rect.x + MAIN_HERO_HEIGHT * 0.55,
                                     self.rect.y + MAIN_HERO_HEIGHT * 0.25,
-                                    self.hit, self.crit, self.accuracy, self.left)
+                                    self.hit, self.crit, self.accuracy, self.left, self.money)
                     field.main_hero_bullet_sprites.add(sprite)
                     self.finished = True
 
@@ -480,8 +483,10 @@ class MainHero(pygame.sprite.Sprite):
 
 
 class Field:
-    def __init__(self):
-        pass
+    def __init__(self, money):
+        self.money_sprite = pygame.sprite.Group()
+        self.money = Money(self.money_sprite, money)
+        self.money_sprite.add(self.money)
 
     def start_game(self, map_name, main_hero_parameters):
         self.main_hero_parameters = main_hero_parameters
@@ -495,6 +500,8 @@ class Field:
         self.persons_sprites = pygame.sprite.Group()
         self.textures_sprites = pygame.sprite.Group()
         self.messages = Message()
+
+        self.cup_sprites = pygame.sprite.Group()
 
         self.persons_a = list(map(int, f.readline().split()))
         self.persons_b = list(map(int, f.readline().split()))
@@ -551,16 +558,22 @@ class Field:
                     main_hero_pos = (j, i)
 
                 elif line[j] == 'A':
-                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, False, self.enemies_bullet_sprites)
+                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, False,
+                                         self.enemies_bullet_sprites)
                     self.persons_sprites.add(sprite)
                     self.start_position_a.append(((j, i), False))
 
                 elif line[j] == 'a':
-                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, True, self.enemies_bullet_sprites)
+                    sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, True,
+                                         self.enemies_bullet_sprites)
                     self.persons_sprites.add(sprite)
                     self.start_position_a.append(((j, i), True))
 
-        self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos)
+                elif line[j] == '@':
+                    sprite = Cup(self.cup_sprites, j, i)
+                    self.cup_sprites.add(sprite)
+
+        self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos, self.money)
         self.main_hero_sprite.add(self.main_hero)
 
         self.main_hero_scale_hp = Scale(self.main_hero)
@@ -587,16 +600,25 @@ class Field:
 
         self.main_hero_scale_hp.replay()
 
+        for i in self.cup_sprites:
+            i.replay()
+
     def update(self, left, right, up, space):
         self.main_hero_sprite.update(left, right, up, space)
         self.persons_sprites.update(camera, self.textures_sprites)
         self.textures_sprites.update(camera)
+
+        self.cup_sprites.update(camera)
+
         self.main_hero_bullet_sprites.update(camera, self.textures_sprites, self.persons_sprites, self.messages)
         self.enemies_bullet_sprites.update(camera, self.textures_sprites, self.main_hero, self.messages)
 
         self.persons_sprites.draw(screen)
         self.textures_sprites.draw(screen)
         self.main_hero_bullet_sprites.draw(screen)
+
+        self.cup_sprites.draw(screen)
+
         self.main_hero_sprite.draw(screen)
         self.enemies_bullet_sprites.draw(screen)
 
@@ -606,6 +628,13 @@ class Field:
         self.messages.draw(screen, camera)
 
         self.main_hero_scale_hp.update(screen)
+
+        self.money_sprite.update(screen)
+        self.money_sprite.draw(screen)
+
+        for cup in self.cup_sprites:
+            if pygame.sprite.collide_rect(self.main_hero, cup):  # если есть пересечение платформы с игроком
+                return 'win'
 
     def move_camera_back(self):
         for sprite in self.main_hero_sprite:
@@ -618,33 +647,37 @@ class Field:
             camera.move_back(sprite)
         for sprite in self.enemies_bullet_sprites:
             camera.move_back(sprite)
-
+        for sprite in self.cup_sprites:
+            camera.move_back(sprite)
 
 def play(map_name, main_hero_parameters, start_money):  # Сколько денег у игрока было в момент игры
     global camera, field
     running = True
     clock = pygame.time.Clock()
-    field = Field()
+    money = start_money
+
+    field = Field(money)
+
     field.start_game(map_name, main_hero_parameters)
 
     camera = Camera()
-
-    money = Money(start_money)
 
     while running:
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                return 'exit', field.money.number
 
         keys = pygame.key.get_pressed()
 
-        field.update(
+        res = field.update(
             keys[pygame.K_LEFT],
             keys[pygame.K_RIGHT],
             keys[pygame.K_UP],
             keys[pygame.K_SPACE]
         )
+        if res == 'win':
+            return 3, field.money.number
         pygame.display.flip()
         field.move_camera_back()
         clock.tick(fps)
