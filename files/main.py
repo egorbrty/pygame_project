@@ -16,13 +16,11 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-#распаковка переменных из БД
-#f = open("123.txt", "r")
+# распаковка переменных из БД
 
 flag = 0
 s1 = s2 = s3 = s4 = s5 = s6 = 0
 
-money = 100
 prise1 = 10
 prise2 = 10
 prise3 = 10
@@ -33,18 +31,46 @@ prise6 = 10
 
 class DataBase:
     """Отвечает за хранение файлов об игроке"""
-    pass
+    def __init__(self):
+        file = open(r"data\pumping\money.txt", "r")
+        self.money = int(file.readline().strip())
+
+        file = open(r"data\pumping\main_hero_parameters.txt", "r")
+        self.main_hero_parameters = []
+        for i in range(6):
+            self.main_hero_parameters.append(int(file.readline().strip()))
+
+
+    def save(self):
+        # Количество денег
+        file = open(r"data\pumping\money.txt", "w")
+        file.write(str(self.money))
+        file.close()
+
+        # Прокачка персонажей
+        file = open(r"data\pumping\main_hero_parameters.txt", "w")
+
+        for i in self.main_hero_parameters:
+            file.write(str(i) + '\n')
+
+    def bye(self, number):
+        if self.money >= 10:
+            self.main_hero_parameters[number - 1] += 1
+            self.money -= 10
+            time.sleep(0.2)
 
 
 
 def start_game(map_number):
-    a = play(rf'data\maps\level_{map_number}.txt', [500, 100, 25, 200, 100, 900], 100)
+    a = play(rf'data\maps\level_{map_number}.txt', *data.main_hero_parameters, data.money)
     time.sleep(0.2)
     print(a)
 
+    data.money = a[1]
+
     if a[0] == 'exit':
-        running = False
         pygame.quit()
+        data.save()
         exit()
 
 
@@ -133,7 +159,7 @@ class knopka4(pygame.sprite.Sprite):
         self.rect.center = (WIDTH // 7, HEIGHT // 2)
 
     def update(self, *args):
-        global flag, s1, money, prise1
+        global flag
         if args and args[0].type == pygame.MOUSEMOTION and \
                 self.rect.collidepoint(args[0].pos):
             self.image = pygame.transform.scale(self.image, (185, 260))
@@ -145,10 +171,8 @@ class knopka4(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 7, HEIGHT // 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            if money >= prise1:
-                s1 += 1
-                money -= prise1
-                time.sleep(0.22)
+
+            data.bye(1)
 
 
 class knopka5(pygame.sprite.Sprite):
@@ -160,7 +184,7 @@ class knopka5(pygame.sprite.Sprite):
         self.rect.center = (WIDTH // 7 * 2, HEIGHT // 2)
 
     def update(self, *args):
-        global flag, s2, money, prise2
+        global flag
         if args and args[0].type == pygame.MOUSEMOTION and \
                 self.rect.collidepoint(args[0].pos):
             self.image = pygame.transform.scale(self.image, (185, 260))
@@ -172,10 +196,7 @@ class knopka5(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 7 * 2, HEIGHT // 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            if money >= prise2:
-                s2 += 1
-                money -= prise2
-                time.sleep(0.22)
+            data.bye(2)
 
 
 class knopka6(pygame.sprite.Sprite):
@@ -187,7 +208,7 @@ class knopka6(pygame.sprite.Sprite):
         self.rect.center = (WIDTH // 7 * 3, HEIGHT // 2)
 
     def update(self, *args):
-        global flag, s3, money, prise3
+        global flag
         if args and args[0].type == pygame.MOUSEMOTION and \
                 self.rect.collidepoint(args[0].pos):
             self.image = pygame.transform.scale(self.image, (185, 260))
@@ -199,10 +220,8 @@ class knopka6(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 7 * 3, HEIGHT // 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            if money >= prise3:
-                s3 += 1
-                money -= prise3
-                time.sleep(0.22)
+            data.bye(3)
+
 
 
 class knopka7(pygame.sprite.Sprite):
@@ -214,7 +233,7 @@ class knopka7(pygame.sprite.Sprite):
         self.rect.center = (WIDTH // 7 * 4, HEIGHT // 2)
 
     def update(self, *args):
-        global flag, s4, money, prise4
+        global flag
         if args and args[0].type == pygame.MOUSEMOTION and \
                 self.rect.collidepoint(args[0].pos):
             self.image = pygame.transform.scale(self.image, (185, 260))
@@ -226,10 +245,8 @@ class knopka7(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 7 * 4, HEIGHT // 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            if money >= prise4:
-                s4 += 1
-                money -= prise4
-                time.sleep(0.22)
+            data.bye(4)
+
 
 
 class knopka8(pygame.sprite.Sprite):
@@ -241,7 +258,7 @@ class knopka8(pygame.sprite.Sprite):
         self.rect.center = (WIDTH // 7 * 5, HEIGHT // 2)
 
     def update(self, *args):
-        global flag, s5, money, prise5
+        global flag
         if args and args[0].type == pygame.MOUSEMOTION and \
                 self.rect.collidepoint(args[0].pos):
             self.image = pygame.transform.scale(self.image, (185, 260))
@@ -253,10 +270,8 @@ class knopka8(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 7 * 5, HEIGHT // 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            if money >= prise5:
-                s5 += 1
-                money -= prise5
-                time.sleep(0.22)
+            data.bye(5)
+
 
 
 class knopka9(pygame.sprite.Sprite):
@@ -268,7 +283,7 @@ class knopka9(pygame.sprite.Sprite):
         self.rect.center = (WIDTH // 7 * 6, HEIGHT // 2)
 
     def update(self, *args):
-        global flag, s6, money, prise6
+        global flag
         if args and args[0].type == pygame.MOUSEMOTION and \
                 self.rect.collidepoint(args[0].pos):
             self.image = pygame.transform.scale(self.image, (185, 260))
@@ -280,10 +295,7 @@ class knopka9(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 7 * 6, HEIGHT // 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            if money >= prise6:
-                s6 += 1
-                money -= prise6
-                time.sleep(0.22)
+            data.bye(6)
 
 
 class star_world(pygame.sprite.Sprite):
@@ -590,15 +602,16 @@ all_sprites3.add(skrin1, knopka11, knopka12, knopka13, knopka14,
 
 # Цикл игры
 running = True
+data = DataBase()
 while running:
     clock.tick(FPS)
+    # Ввод процесса (события)
+    for event in pygame.event.get():
+        # check for closing window
+        if event.type == pygame.QUIT:
+            data.save()
+            running = False
     if flag == 0:
-        # Ввод процесса (события)
-        for event in pygame.event.get():
-            # check for closing window
-            if event.type == pygame.QUIT:
-                running = False
-
         # Обновление
         all_sprites.update(event)
         
@@ -609,12 +622,6 @@ while running:
         pygame.display.flip()
     elif flag == 1:
         font = pygame.font.Font(None, 50)
-        
-        # Ввод процесса (события)
-        for event in pygame.event.get():
-            # check for closing window
-            if event.type == pygame.QUIT:
-                running = False
 
         # Обновление
         all_sprites2.update(event)
@@ -623,17 +630,17 @@ while running:
         screen.fill(BLACK)
         all_sprites2.draw(screen)
 
-        text = font.render("ур. " + str(s1), True, (255, 50, 50))
+        text = font.render("ур. " + str(data.main_hero_parameters[0]), True, (255, 50, 50))
         screen.blit(text, (WIDTH // 7 - 50, HEIGHT // 2 - 200))
-        text = font.render("ур. " + str(s2), True, (255, 50, 50))
+        text = font.render("ур. " + str(data.main_hero_parameters[1]), True, (255, 50, 50))
         screen.blit(text, (WIDTH // 7 * 2 - 50, HEIGHT // 2 - 200))
-        text = font.render("ур. " + str(s3), True, (255, 50, 50))
+        text = font.render("ур. " + str(data.main_hero_parameters[2]), True, (255, 50, 50))
         screen.blit(text, (WIDTH // 7 * 3 - 50, HEIGHT // 2 - 200))
-        text = font.render("ур. " + str(s4), True, (255, 50, 50))
+        text = font.render("ур. " + str(data.main_hero_parameters[3]), True, (255, 50, 50))
         screen.blit(text, (WIDTH // 7 * 4 - 50, HEIGHT // 2 - 200))
-        text = font.render("ур. " + str(s5), True, (255, 50, 50))
+        text = font.render("ур. " + str(data.main_hero_parameters[4]), True, (255, 50, 50))
         screen.blit(text, (WIDTH // 7 * 5 - 50, HEIGHT // 2 - 200))
-        text = font.render("ур. " + str(s6), True, (255, 50, 50))
+        text = font.render("ур. " + str(data.main_hero_parameters[5]), True, (255, 50, 50))
         screen.blit(text, (WIDTH // 7 * 6 - 50, HEIGHT // 2 - 200))
 
         text = font.render("    " + str(prise1), True, (255, 255, 50))
@@ -649,18 +656,12 @@ while running:
         text = font.render("    " + str(prise6), True, (255, 255, 50))
         screen.blit(text, (WIDTH // 7 * 6 - 50, HEIGHT // 2 + 150))
 
-        text = font.render(str(money), True, (255, 255, 0))
+        text = font.render(str(data.money), True, (255, 255, 0))
         screen.blit(text, (10, 10))
         
         # После отрисовки всего, переворачиваем экран
         pygame.display.flip()
     elif flag == 2:
-        # Ввод процесса (события)
-        for event in pygame.event.get():
-            # check for closing window
-            if event.type == pygame.QUIT:
-                running = False
-
         # Обновление
         all_sprites3.update(event)
         
