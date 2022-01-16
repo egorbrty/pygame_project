@@ -70,6 +70,7 @@ class BattleDroidBullet(EnemiesBullet):
                         print('Критический')
                         damage *= 2
                     if main_hero.is_alive():
-                        main_hero.get_damage_ch(damage)
+                        main_hero.get_damage_ch_shot(damage, self.left)
+                        print('die')
                 else:
                     print('Мимо')

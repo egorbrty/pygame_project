@@ -57,6 +57,9 @@ class Stone(pygame.sprite.Sprite):
     def shot(self):
         self.shaking = 1
 
+    def touch(self, hero):
+        pass
+
 
 class Grass(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
@@ -89,6 +92,10 @@ class Grass(pygame.sprite.Sprite):
         pass
 
 
+    def touch(self, hero):
+        pass
+
+
 class Sand(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
 
@@ -118,6 +125,11 @@ class Sand(pygame.sprite.Sprite):
 
     def shot(self):
         pass
+
+
+    def touch(self, hero):
+        pass
+
 
 class Ice(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
@@ -153,6 +165,11 @@ class Ice(pygame.sprite.Sprite):
 
     def shot(self):
         pass
+
+
+    def touch(self, hero):
+        pass
+
 
 class BreakingWall(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
@@ -206,7 +223,10 @@ class BreakingWall(pygame.sprite.Sprite):
     def shot(self):
         self.breaking = True
 
-# Zero
+    def touch(self, hero):
+        pass
+
+
 class Platform(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK * 0.1)
 
@@ -233,6 +253,45 @@ class Platform(pygame.sprite.Sprite):
     def replay(self, *args):
         self.rect.x = self.x_position * SIZE_OF_BLOCK
         self.rect.y = self.y_position * SIZE_OF_BLOCK + SIZE_OF_BLOCK * 0.45
+
+    def get_speed(self, speed, maximum_speed, left):
+        return speed
+
+    def shot(self):
+        pass
+
+    def touch(self, hero):
+        pass
+
+
+class Spike(pygame.sprite.Sprite):
+    sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
+
+    image = load_image(r"data\pictures\textures\spike.png", -1)
+    image = pygame.transform.scale(image, sizes)
+
+    def __init__(self, group, x_position, y_position):
+        super().__init__(group)
+        self.image = self.image
+
+        self.x_position = x_position
+        self.y_position = y_position
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x_position * SIZE_OF_BLOCK
+        self.rect.y = y_position * SIZE_OF_BLOCK
+
+        self.damage = 0.5
+
+    def update(self, camera):
+        camera.move_camera(self)
+
+    def touch(self, hero):
+        hero.get_damage_ch(hero.start_hp * self.damage / fps, self.rect.top)
+
+    def replay(self, *args):
+        self.rect.x = self.x_position * SIZE_OF_BLOCK
+        self.rect.y = self.y_position * SIZE_OF_BLOCK
 
     def get_speed(self, speed, maximum_speed, left):
         return speed

@@ -50,6 +50,18 @@ class MainHero(pygame.sprite.Sprite):
         die_2_mas_right.append(image)
         die_2_mas_left.append(pygame.transform.flip(image, True, False))
 
+    die_1_mas_right = []
+    die_1_mas_left = []
+
+    for i in range(11):
+        image = load_image(f"data/pictures/clone/die_1/die_1_{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        die_1_mas_right.append(image)
+        die_1_mas_left.append(pygame.transform.flip(image, True, False))
+
     stand_mas_right = []
     stand_mas_left = []
 
@@ -139,15 +151,33 @@ class MainHero(pygame.sprite.Sprite):
 
         self.started = 0  # Как давно началась игра
 
-    def get_damage_ch(self, damage):
+    def get_damage_ch(self, damage, y_pos=None):
         # Получает урон
         if not self.is_alive():
             return
 
         self.hp -= damage
 
+
         if self.hp <= 0:
+            if y_pos is not None:
+                self.onGround = y_pos
+
             self.die_2()
+        else:
+            if self.onGround:
+                self.process = [3, 0]
+
+    def get_damage_ch_shot(self, damage, left):
+        # Получает урон от выстрела
+        self.left = not left
+        if not self.is_alive():
+            return
+
+        self.hp -= damage
+
+        if not self.is_alive():
+            self.die_1()
         else:
             if self.onGround:
                 self.process = [3, 0]
@@ -163,7 +193,7 @@ class MainHero(pygame.sprite.Sprite):
             self.last_damage = 0
 
     def check_position(self):
-        """Убивает игрока, если он вылетел далеко за пределы карты"""
+        """Убивает игрока, если он вылетел за пределы карты"""
         if self.rect.x < 0 or self.rect.x > width:
             self.fall = True
             self.die_2()
@@ -226,8 +256,9 @@ class MainHero(pygame.sprite.Sprite):
             camera.move_camera(self)
             return
         elif self.process[0] == -3:
+            # die_2
             self.process[1] += 2 / fps
-            if int(self.process[1]) == len(MainHero.going_mas_left):
+            if int(self.process[1]) == len(MainHero.die_2_mas_left):
                 self.die()
 
             else:
@@ -240,6 +271,29 @@ class MainHero(pygame.sprite.Sprite):
 
             self.rect.bottom = self.onGround
             self.rect.bottom += MAIN_HERO_HEIGHT * 0.19
+            camera.update(self,
+                          field.level_width * SIZE_OF_BLOCK,
+                          field.level_height * SIZE_OF_BLOCK
+                          )
+            camera.move_camera(self)
+
+            return
+
+        elif self.process[0] == -2:
+            # die_1
+            self.process[1] += 8 / fps
+            if int(self.process[1]) == len(MainHero.die_1_mas_left):
+                print('die_1()')
+                self.die()
+
+            else:
+                if self.left:
+                    self.image = MainHero.die_1_mas_left[int(self.process[1])]
+                else:
+                    self.image = MainHero.die_1_mas_right[int(self.process[1])]
+
+            self.rect.bottom = self.onGround
+
             camera.update(self,
                           field.level_width * SIZE_OF_BLOCK,
                           field.level_height * SIZE_OF_BLOCK
@@ -420,6 +474,7 @@ class MainHero(pygame.sprite.Sprite):
     def check_collide_x(self, v_x, textures):
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
+                texture.touch(self)
                 if v_x > 0:
                     self.rect.right = texture.rect.left
 
@@ -431,6 +486,7 @@ class MainHero(pygame.sprite.Sprite):
         self.mas_stand.clear()
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
+                texture.touch(self)
                 if v_y > 0:
                     self.rect.bottom = texture.rect.top
                     self.onGround = texture.rect.top
@@ -541,6 +597,11 @@ class Field:
 
                 elif line[j] == '6':
                     sprite = Platform(self.textures_sprites, j, i)
+                    self.textures_mas.append(sprite)
+                    self.textures_sprites.add(sprite)
+
+                elif line[j] == '7':
+                    sprite = Spike(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 

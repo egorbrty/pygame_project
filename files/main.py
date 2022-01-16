@@ -12,7 +12,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.KEYDOWN:
             a = play(r'data\maps\level_1.txt', [100, 100, 25, 200, 100, 900], 100)
             print(a)
 
