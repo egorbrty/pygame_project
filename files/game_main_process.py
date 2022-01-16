@@ -1,3 +1,5 @@
+import pygame.sprite
+
 from functions import *
 from camera import Camera
 from textures import *
@@ -7,6 +9,7 @@ from hp_scale import Scale
 from message import Message
 from money import Money
 from finish import Cup
+from pause import *
 
 
 class MainHero(pygame.sprite.Sprite):
@@ -283,7 +286,6 @@ class MainHero(pygame.sprite.Sprite):
             # die_1
             self.process[1] += 8 / fps
             if int(self.process[1]) == len(MainHero.die_1_mas_left):
-                print('die_1()')
                 self.die()
 
             else:
@@ -292,6 +294,7 @@ class MainHero(pygame.sprite.Sprite):
                 else:
                     self.image = MainHero.die_1_mas_right[int(self.process[1])]
 
+            self.rect.height = self.image.get_height()
             self.rect.bottom = self.onGround
 
             camera.update(self,
@@ -306,6 +309,7 @@ class MainHero(pygame.sprite.Sprite):
             self.process[1] += 10 / fps
             if int(self.process[1]) == len(MainHero.hit_mas_left):
                 self.process = [5, 0]
+                self.check_collide_x(int(self.left), field.textures_sprites)
 
             else:
                 if self.left:
@@ -726,11 +730,55 @@ def play(map_name, main_hero_parameters, start_money):  # Сколько ден�
 
     camera = Camera()
 
+    game_paused = False
+
+    pause_sprite_group = pygame.sprite.Group()
+    pause = Pause(pause_sprite_group)
+    pause_sprite_group.add(pause)
+
+    pause_window_buttons = pygame.sprite.Group()
+    exit_button = Button(pause_window_buttons, 'data/pictures/exit.png', (width * 0.3, height // 2))
+    replay_button = Button(pause_window_buttons, 'data/pictures/replay.png', (width * 0.5, height // 2))
+    continue_button = Button(pause_window_buttons, 'data/pictures/continue.png', (width * 0.7, height // 2))
+
+    pause_window_buttons.add(exit_button)
+    pause_window_buttons.add(replay_button)
+    pause_window_buttons.add(continue_button)
+
     while running:
         screen.fill((0, 0, 0))
+        click = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 'exit', field.money.number
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                click = True
+
+        if game_paused:
+            mouse_pos = pygame.mouse.get_pos()
+
+            # --------------------------------------Отрисовка окна паузы------------------------------------------------
+            pygame.draw.rect(screen, (255, 255, 255),
+                             (int(width * 0.2), int(height * 0.3), int(width * 0.6), int(height * 0.4)),
+                             5
+                             )
+            pause_window_buttons.update(mouse_pos)
+            pause_window_buttons.draw(screen)
+
+            if click and exit_button.rect.collidepoint(mouse_pos):
+                return 0, field.money.number
+            elif click and replay_button.rect.collidepoint(mouse_pos):
+                field.replay()
+                game_paused = False
+            elif click and continue_button.rect.collidepoint(mouse_pos):
+                game_paused = False
+
+            # --------------------------------------Отрисовка окна паузы------------------------------------------------
+
+            pygame.display.update((int(width * 0.2), int(height * 0.3), int(width * 0.6), int(height * 0.4)))
+            clock.tick(fps)
+
+            continue
 
         keys = pygame.key.get_pressed()
 
@@ -742,6 +790,17 @@ def play(map_name, main_hero_parameters, start_money):  # Сколько ден�
         )
         if res == 'win':
             return 3, field.money.number
+
+        mouse_pos = pygame.mouse.get_pos()
+
+        mouse_is_on_pause_button = pause.rect.collidepoint(mouse_pos)
+
+        pause_sprite_group.update(mouse_is_on_pause_button)
+        pause_sprite_group.draw(screen)
+
+        if mouse_is_on_pause_button and click:
+            game_paused = True
+
         pygame.display.flip()
         field.move_camera_back()
         clock.tick(fps)

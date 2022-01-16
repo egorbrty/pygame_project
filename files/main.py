@@ -13,11 +13,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            a = play(r'data\maps\level_1.txt', [100, 100, 25, 200, 100, 900], 100)
+            a = play(r'data\maps\level_1.txt', [500, 100, 25, 200, 100, 900], 100)
             print(a)
 
             if a[0] == 'exit':
                 running = False
+                break
 
     pygame.display.flip()
     clock.tick(fps)
