@@ -1,6 +1,8 @@
 import pygame
 import os
 import time
+from game_main_process import play
+from functions import *
 
 
 WIDTH = 1350
@@ -27,6 +29,24 @@ prise3 = 10
 prise4 = 10
 prise5 = 10
 prise6 = 10
+
+
+class DataBase:
+    """Отвечает за хранение файлов об игроке"""
+    pass
+
+
+
+def start_game(map_number):
+    a = play(rf'data\maps\level_{map_number}.txt', [500, 100, 25, 200, 100, 900], 100)
+    time.sleep(0.2)
+    print(a)
+
+    if a[0] == 'exit':
+        running = False
+        pygame.quit()
+        exit()
+
 
 class knopka1(pygame.sprite.Sprite):
     def __init__(self):
@@ -307,12 +327,6 @@ class skrin1(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
 
-##    def update(self, *args):
-##        global flag, flag2
-##        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
-##                self.rect.collidepoint(args[0].pos):
-##            print(123)
-
 
 class knopka11(pygame.sprite.Sprite):
     def __init__(self):
@@ -335,7 +349,8 @@ class knopka11(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5, HEIGHT // 3)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            print('I e')
+            start_game(1)
 
 
 class knopka12(pygame.sprite.Sprite):
@@ -359,7 +374,7 @@ class knopka12(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(2)
 
 
 class knopka13(pygame.sprite.Sprite):
@@ -383,7 +398,7 @@ class knopka13(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(3)
 
 
 class knopka14(pygame.sprite.Sprite):
@@ -407,7 +422,7 @@ class knopka14(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(4)
 
 
 class knopka15(pygame.sprite.Sprite):
@@ -431,7 +446,7 @@ class knopka15(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 1, HEIGHT // 3 * 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(5)
 
 
 class knopka16(pygame.sprite.Sprite):
@@ -455,7 +470,7 @@ class knopka16(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 2, HEIGHT // 3 * 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(6)
 
 
 class knopka17(pygame.sprite.Sprite):
@@ -479,7 +494,7 @@ class knopka17(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 3, HEIGHT // 3 * 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(7)
 
 
 class knopka18(pygame.sprite.Sprite):
@@ -503,7 +518,7 @@ class knopka18(pygame.sprite.Sprite):
             self.rect.center = (WIDTH // 5 * 4, HEIGHT // 3 * 2)
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(4)
+            start_game(8)
 
 
 # Создаем игру и окно
@@ -656,3 +671,5 @@ while running:
         pygame.display.flip()
 
 pygame.quit()
+
+
