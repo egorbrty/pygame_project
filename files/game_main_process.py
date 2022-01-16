@@ -165,7 +165,7 @@ class MainHero(pygame.sprite.Sprite):
 
             self.die_2()
         else:
-            if self.onGround:
+            if self.onGround and y_pos is None:
                 self.process = [3, 0]
 
     def get_damage_ch_shot(self, damage, left):
@@ -474,7 +474,6 @@ class MainHero(pygame.sprite.Sprite):
     def check_collide_x(self, v_x, textures):
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
-                texture.touch(self)
                 if v_x > 0:
                     self.rect.right = texture.rect.left
 
@@ -484,23 +483,27 @@ class MainHero(pygame.sprite.Sprite):
     def check_collide_y(self, v_y, textures):
         self.rect.y += 1
         self.mas_stand.clear()
+
+        bottom = []  # Нижняя точка игрока
         for texture in textures:
-            if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
+            if pygame.sprite.collide_rect(self, texture):
                 texture.touch(self)
                 if v_y > 0:
-                    self.rect.bottom = texture.rect.top
+                    bottom.append(texture.rect.top)
                     self.onGround = texture.rect.top
-                    self.v_y = 0  # энергия падения пропадает
+                    self.v_y = 0
 
-                if v_y < 0:  # если движется вверх
+                if v_y < 0:
                     self.rect.top = texture.rect.bottom
-                    self.v_y = 0  # энергия прыжка пропадает
+                    self.v_y = 0
                 self.mas_stand.append(texture)
+        if bottom:
+            self.rect.bottom = min(bottom)
 
     def check_if_on_the_ground(self, textures):
         self.rect.y += 5
         for texture in textures:
-            if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
+            if pygame.sprite.collide_rect(self, texture):
                 self.rect.y -= 5
                 return True
 
