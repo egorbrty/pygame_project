@@ -59,12 +59,16 @@ class DataBase:
             self.money -= 10
             time.sleep(0.2)
 
+    def get_level(self, num):
+        return self.main_hero_parameters[num]
+
 
 
 def start_game(map_number):
-    a = play(rf'data\maps\level_{map_number}.txt', *data.main_hero_parameters, data.money)
+    a = play(rf'data\maps\level_{map_number}.txt', data.main_hero_parameters, data.money)
     time.sleep(0.2)
     print(a)
+    time.sleep(0.2)
 
     data.money = a[1]
 
