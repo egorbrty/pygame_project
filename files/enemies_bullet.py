@@ -42,10 +42,24 @@ class BattleDroidBullet(EnemiesBullet):
         self.rect.x = x_position
         self.rect.y = y_position
 
+        self.process = 0
+
     def update(self, camera, textures, main_hero, messages):
         if self.stop:
             # Попадание
-            self.kill()
+            self.process += int(600 / fps)
+            camera.move_camera(self)
+
+            if self.process // fps >= len(self.mas_left):
+                self.kill()
+                print(123)
+                return
+
+            if self.left:
+                self.image = self.mas_left[self.process // fps]
+            else:
+                self.image = self.mas_right[self.process // fps]
+
             return
 
         if self.left:
@@ -57,7 +71,7 @@ class BattleDroidBullet(EnemiesBullet):
 
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):
-                self.kill()
+                self.stop = True
                 texture.shot()
                 break
 
@@ -74,3 +88,22 @@ class BattleDroidBullet(EnemiesBullet):
                         print('die')
                 else:
                     print('Мимо')
+
+
+class SuperBattleDroidBullet(BattleDroidBullet):
+    mas_right = []
+    mas_left = []
+    sizes = (MAIN_HERO_HEIGHT / 2, MAIN_HERO_HEIGHT / 2)
+
+    for i in range(4):
+        image = load_image(f"data/pictures/super battle droid/shoot/bullet{i + 1}.png", -1)
+
+        image = pygame.transform.scale(image, sizes)
+
+        mas_left.append(image)
+        mas_right.append(pygame.transform.flip(image, True, False))
+
+    def __init__(self, group, x_position, y_position, left, shooter):
+        super().__init__(group, x_position, y_position, left, shooter)
+
+

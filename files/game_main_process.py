@@ -3,7 +3,7 @@ import pygame.sprite
 from functions import *
 from camera import Camera
 from textures import *
-from enemies import BattleDroid
+from enemies import BattleDroid, SuperBattleDroid
 from bullet import Bullet
 from hp_scale import Scale
 from message import Message
@@ -637,6 +637,18 @@ class Field:
                     self.persons_sprites.add(sprite)
                     self.start_position_a.append(((j, i), True))
 
+                elif line[j] == 'B':
+                    sprite = SuperBattleDroid(self.persons_sprites, *self.persons_b, j, i, False,
+                                              self.enemies_bullet_sprites)
+                    self.persons_sprites.add(sprite)
+                    self.start_position_b.append(((j, i), False))
+
+                elif line[j] == 'b':
+                    sprite = SuperBattleDroid(self.persons_sprites, *self.persons_b, j, i, True,
+                                              self.enemies_bullet_sprites)
+                    self.persons_sprites.add(sprite)
+                    self.start_position_b.append(((j, i), True))
+
                 elif line[j] == '@':
                     sprite = Cup(self.cup_sprites, j, i)
                     self.cup_sprites.add(sprite)
@@ -662,6 +674,10 @@ class Field:
 
         for i in self.start_position_a:
             sprite = BattleDroid(self.persons_sprites, *self.persons_a, *i[0], i[1], self.enemies_bullet_sprites)
+            self.persons_sprites.add(sprite)
+
+        for i in self.start_position_b:
+            sprite = SuperBattleDroid(self.persons_sprites, *self.persons_b, *i[0], i[1], self.enemies_bullet_sprites)
             self.persons_sprites.add(sprite)
 
         self.messages.replay()
@@ -721,6 +737,7 @@ class Field:
             camera.move_back(sprite)
         for sprite in self.cup_sprites:
             camera.move_back(sprite)
+
 
 def play(map_name, main_hero_parameters, start_money):  # Сколько денег у игрока было в момент игры
     global camera, field
