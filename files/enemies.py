@@ -58,6 +58,11 @@ class Enemy(pygame.sprite.Sprite):
             self.process = [2, 0]
         self.finished = False
 
+    def rotate(self, main_hero_x_pos):
+        """Поворачивает стоящего дроида в сторону игрoка"""
+        if self.stand and self.process[0] == 0:
+            self.left = main_hero_x_pos <= self.rect.x
+
 
 class BattleDroid(Enemy):
     image = load_image(f"data/pictures/battle droid/going/going1.png", -1)

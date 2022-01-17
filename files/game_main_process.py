@@ -681,6 +681,10 @@ class Field:
         self.main_hero_bullet_sprites.update(camera, self.textures_sprites, self.persons_sprites, self.messages)
         self.enemies_bullet_sprites.update(camera, self.textures_sprites, self.main_hero, self.messages)
 
+        for i in self.persons_sprites:
+            """Разворачивает стоящих в сторону игрока"""
+            i.rotate(self.main_hero.rect.x)
+
         self.persons_sprites.draw(screen)
         self.textures_sprites.draw(screen)
         self.main_hero_bullet_sprites.draw(screen)
