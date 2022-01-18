@@ -10,6 +10,7 @@ from message import Message
 from money import Money
 from finish import Cup
 from pause import *
+from decorations import Decoration
 
 
 class MainHero(pygame.sprite.Sprite):
@@ -560,6 +561,8 @@ class Field:
         self.main_hero_bullet_sprites = pygame.sprite.Group()
         self.enemies_bullet_sprites = pygame.sprite.Group()
 
+        self.decoration_sprites = pygame.sprite.Group()
+
         self.persons_sprites = pygame.sprite.Group()
         self.textures_sprites = pygame.sprite.Group()
         self.messages = Message()
@@ -666,6 +669,14 @@ class Field:
                     sprite = Cup(self.cup_sprites, j, i)
                     self.cup_sprites.add(sprite)
 
+                elif line[j] == 'R':
+                    sprite = Decoration(self.decoration_sprites, j, i, r'data\pictures\decorations\right.png')
+                    self.decoration_sprites.add(sprite)
+
+                elif line[j] == 'L':
+                    sprite = Decoration(self.decoration_sprites, j, i, r'data\pictures\decorations\left.png')
+                    self.decoration_sprites.add(sprite)
+
         self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos, self.money)
         self.main_hero_sprite.add(self.main_hero)
 
@@ -697,6 +708,9 @@ class Field:
             sprite = Destroyer(self.persons_sprites, *self.persons_b, *i[0], i[1], self.enemies_bullet_sprites)
             self.persons_sprites.add(sprite)
 
+        for i in self.decoration_sprites:
+            i.replay()
+
         self.messages.replay()
 
         self.main_hero_scale_hp.replay()
@@ -708,6 +722,9 @@ class Field:
         self.main_hero_sprite.update(left, right, up, space)
         self.persons_sprites.update(camera, self.textures_sprites)
         self.textures_sprites.update(camera)
+
+        self.decoration_sprites.update(camera)
+        self.decoration_sprites.draw(screen)
 
         self.cup_sprites.update(camera)
 
@@ -744,17 +761,24 @@ class Field:
     def move_camera_back(self):
         for sprite in self.main_hero_sprite:
             camera.move_back(sprite)
+
         for sprite in self.persons_sprites:
             camera.move_back(sprite)
+
         for sprite in self.textures_sprites:
             camera.move_back(sprite)
+
         for sprite in self.main_hero_bullet_sprites:
             camera.move_back(sprite)
+
         for sprite in self.enemies_bullet_sprites:
             camera.move_back(sprite)
+
         for sprite in self.cup_sprites:
             camera.move_back(sprite)
 
+        for sprite in self.decoration_sprites:
+            camera.move_back(sprite)
 
 def play(map_name, main_hero_parameters, start_money):  # Сколько денег у игрока было в момент игры
     global camera, field

@@ -1,10 +1,6 @@
 from functions import *
 
 
-pygame.init()
-screen = pygame.display.set_mode(size)
-
-
 class Stone(pygame.sprite.Sprite):
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
 
