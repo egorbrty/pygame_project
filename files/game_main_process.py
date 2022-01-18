@@ -10,6 +10,7 @@ from message import Message
 from money import Money
 from finish import Cup
 from pause import *
+from star import Star
 from decorations import Decoration
 
 
@@ -556,6 +557,7 @@ class Field:
         self.main_hero_parameters = main_hero_parameters
         f = open(map_name, 'r', encoding='utf-8')
         self.map_name = map_name
+        self.star_sprite = pygame.sprite.Group()
 
         self.main_hero_sprite = pygame.sprite.Group()
         self.main_hero_bullet_sprites = pygame.sprite.Group()
@@ -588,6 +590,7 @@ class Field:
         self.start_position_f = []
 
         main_hero_pos = (0, 0)
+        star_pos = (0, 0)
         for i in range(self.level_height):
             line = f.readline()
             for j in range(self.level_width):
@@ -677,8 +680,14 @@ class Field:
                     sprite = Decoration(self.decoration_sprites, j, i, r'data\pictures\decorations\left.png')
                     self.decoration_sprites.add(sprite)
 
+                elif line[j] == '*':
+                    star_pos = (j, i)
+
         self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos, self.money)
         self.main_hero_sprite.add(self.main_hero)
+
+        self.star = Star(self.star_sprite, *star_pos)
+        self.star_sprite.add(self.star)
 
         self.main_hero_scale_hp = Scale(self.main_hero)
 
@@ -754,9 +763,16 @@ class Field:
         self.money_sprite.update(screen)
         self.money_sprite.draw(screen)
 
+        self.star_sprite.update(camera)
+        self.star_sprite.draw(screen)
+
         for cup in self.cup_sprites:
             if pygame.sprite.collide_rect(self.main_hero, cup):  # если есть пересечение платформы с игроком
                 return 'win'
+
+        for star in self.star_sprite:
+            if pygame.sprite.collide_rect(self.main_hero, star):  # если есть пересечение платформы с игроком
+                self.star.kill()
 
     def move_camera_back(self):
         for sprite in self.main_hero_sprite:
@@ -778,6 +794,9 @@ class Field:
             camera.move_back(sprite)
 
         for sprite in self.decoration_sprites:
+            camera.move_back(sprite)
+
+        for sprite in self.star_sprite:
             camera.move_back(sprite)
 
 def play(map_name, main_hero_parameters, start_money):  # Сколько денег у игрока было в момент игры
@@ -851,7 +870,8 @@ def play(map_name, main_hero_parameters, start_money):  # Сколько ден�
             keys[pygame.K_SPACE]
         )
         if res == 'win':
-            return 3, field.money.number
+            return (True, not len(field.persons_sprites), not len(field.star_sprite)), field.money.number
+            # Первая звезда точно есть. Вторая - если все враги убиты
 
         mouse_pos = pygame.mouse.get_pos()
 

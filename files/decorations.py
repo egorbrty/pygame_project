@@ -17,7 +17,6 @@ class Decoration(pygame.sprite.Sprite):
         self.rect.y = y_position * SIZE_OF_BLOCK + SIZE_OF_BLOCK * 0.5
 
     def update(self, camera):
-        print(self.rect)
         camera.move_camera(self)
 
     def replay(self, *args):
