@@ -58,13 +58,23 @@ class Bullet(pygame.sprite.Sprite):
                     self.stop = True
                     if hit(self.accuracy, person.dexterity):
                         damage = self.hit
+                        first_hp = person.hp
+                        critical = False
                         if hit(self.crit, person.armor):
+                            critical = True
+
+                            damage *= 2
+                        person.get_hit(damage, self.money)
+                        if first_hp == person.hp:
+                            messages.add('Невосприимчивочть',
+                                         (100, 100, 100),
+                                         person.rect.x + person.rect.width // 2,
+                                         person.rect.y)
+                        elif critical:
                             messages.add('Критический',
                                          (255, 0, 0),
                                          person.rect.x + person.rect.width // 2,
                                          person.rect.y)
-                            damage *= 2
-                        person.get_hit(damage, self.money)
                     else:
                         messages.add('Мимо!',
                                      (0, 0, 255),

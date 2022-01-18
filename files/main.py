@@ -1,5 +1,3 @@
-import pygame
-import os
 import time
 from game_main_process import play
 from functions import *

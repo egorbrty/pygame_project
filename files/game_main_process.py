@@ -3,7 +3,7 @@ import pygame.sprite
 from functions import *
 from camera import Camera
 from textures import *
-from enemies import BattleDroid, SuperBattleDroid
+from enemies import BattleDroid, SuperBattleDroid, Destroyer
 from bullet import Bullet
 from hp_scale import Scale
 from message import Message
@@ -553,7 +553,7 @@ class Field:
 
     def start_game(self, map_name, main_hero_parameters):
         self.main_hero_parameters = main_hero_parameters
-        f = open(map_name)
+        f = open(map_name, 'r', encoding='utf-8')
         self.map_name = map_name
 
         self.main_hero_sprite = pygame.sprite.Group()
@@ -574,6 +574,7 @@ class Field:
         self.persons_f = list(map(int, f.readline().split()))
 
         self.level_width, self.level_height = map(int, f.readline().split())
+
         self.textures_mas = []
 
         self.start_position_a = []
@@ -649,6 +650,18 @@ class Field:
                     self.persons_sprites.add(sprite)
                     self.start_position_b.append(((j, i), True))
 
+                elif line[j] == 'C':
+                    sprite = Destroyer(self.persons_sprites, *self.persons_c, j, i, False,
+                                       self.enemies_bullet_sprites)
+                    self.persons_sprites.add(sprite)
+                    self.start_position_c.append(((j, i), False))
+
+                elif line[j] == 'c':
+                    sprite = Destroyer(self.persons_sprites, *self.persons_c, j, i, True,
+                                       self.enemies_bullet_sprites)
+                    self.persons_sprites.add(sprite)
+                    self.start_position_c.append(((j, i), True))
+
                 elif line[j] == '@':
                     sprite = Cup(self.cup_sprites, j, i)
                     self.cup_sprites.add(sprite)
@@ -678,6 +691,10 @@ class Field:
 
         for i in self.start_position_b:
             sprite = SuperBattleDroid(self.persons_sprites, *self.persons_b, *i[0], i[1], self.enemies_bullet_sprites)
+            self.persons_sprites.add(sprite)
+
+        for i in self.start_position_c:
+            sprite = Destroyer(self.persons_sprites, *self.persons_b, *i[0], i[1], self.enemies_bullet_sprites)
             self.persons_sprites.add(sprite)
 
         self.messages.replay()

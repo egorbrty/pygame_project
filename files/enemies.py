@@ -181,7 +181,7 @@ class BattleDroid(Enemy):
             self.process[1] += 10 / fps
 
             if int(self.process[1]) == len(self.hit_mas_right):
-                self.process[0] = 0
+                self.process = [0, 0]
                 self.image = self.going_mas_right[0]
                 self.rect.height = self.image.get_rect().height
 
@@ -362,7 +362,7 @@ class SuperBattleDroid(Enemy):
             self.process[1] += 10 / fps
 
             if int(self.process[1]) == len(self.hit_mas_right):
-                self.process[0] = 0
+                self.process = [0, 0]
                 self.image = self.going_mas_right[0]
                 self.rect.height = self.image.get_rect().height
 
@@ -448,7 +448,245 @@ class SuperBattleDroid(Enemy):
         if self.mas_stand:
             v_mas = []
             for i in self.mas_stand:
-                v_mas.append(i.get_speed(self.v_x, BATTLE_DROID_SPEED, self.left))
+                v_mas.append(i.get_speed(self.v_x, SUPER_BATTLE_DROID_SPEED, self.left))
+            self.v_x = sum(v_mas) / len(v_mas)
+
+        self.rect.x += int(self.v_x / fps)
+        self.check_collide_x(self.v_x, textures)
+
+        camera.move_camera(self)
+
+
+class Destroyer(Enemy):
+    image = load_image(f"data/pictures/destroyer/going/going1.png", -1)
+    image_rect = image.get_rect()
+    koeff = DESTROYER_HEIGHT / image_rect.height
+
+    sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
+    going_mas_right = []
+    going_mas_left = []
+
+    for i in range(6):
+        image = load_image(f"data/pictures/destroyer/going/going{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        going_mas_left.append(image)
+        going_mas_right.append(pygame.transform.flip(image, True, False))
+    run_width, run_height = sizes
+
+    hit_mas_right = []
+    hit_mas_left = []
+
+    for i in range(7):
+        image = load_image(f"data/pictures/destroyer/hit/hit{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        hit_mas_left.append(image)
+        hit_mas_right.append(pygame.transform.flip(image, True, False))
+
+    die_1_mas_right = []
+    die_1_mas_left = []
+
+    for i in range(9):
+        image = load_image(f"data/pictures/destroyer/die_1/die{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        die_1_mas_left.append(image)
+        die_1_mas_right.append(pygame.transform.flip(image, True, False))
+
+    shoot_mas_right = []
+    shoot_mas_left = []
+
+    for i in range(9):
+        image = load_image(f"data/pictures/destroyer/shoot/shoot{i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        shoot_mas_left.append(image)
+        shoot_mas_right.append(pygame.transform.flip(image, True, False))
+
+    stand_left = load_image(f"data/pictures/destroyer/stand.png", -1)
+    image_rect = stand_left.get_rect()
+    sizes = (image_rect.width * koeff, image_rect.height * koeff)
+    stand_left = pygame.transform.scale(stand_left, sizes)
+    stand_right = pygame.transform.flip(stand_left, True, False)
+
+    shell_mas_right = []
+    shell_mas_left = []
+
+    for i in range(5):
+        image = load_image(f"data/pictures/destroyer/energy shell/energy shell {i + 1}.png", -1)
+        image_rect = image.get_rect()
+        sizes = (image_rect.width * koeff, image_rect.height * koeff)
+        image = pygame.transform.scale(image, sizes)
+
+        shell_mas_left.append(image)
+        shell_mas_right.append(pygame.transform.flip(image, True, False))
+
+    stand_left = load_image(f"data/pictures/destroyer/stand.png", -1)
+    image_rect = stand_left.get_rect()
+    sizes = (image_rect.width * koeff, image_rect.height * koeff)
+    stand_left = pygame.transform.scale(stand_left, sizes)
+    stand_right = pygame.transform.flip(stand_left, True, False)
+
+    def __init__(self, group, hp, armor, hit, crit, dexterity, accuracy, prize, x_pos, y_pos, stand, bullets):
+        super().__init__(group, hp, armor, hit, crit, dexterity, accuracy, prize, x_pos, y_pos, stand)
+
+        self.height = DESTROYER_HEIGHT
+        self.bullets = bullets
+        self.last_shot = random.randint(0, fps * 5)
+        self.last_shell = 9.9
+        self.shield_energy_ch = 0
+
+    def shell(self):
+        if self.process[0] == 0:
+            self.process = [10, 0]  # Оболочка
+            self.shield_energy_ch = 0
+            return True
+        return False
+
+    def get_hit(self, damage, money):
+        if self.process[0] != 10:
+            super().get_hit(damage, money)
+        else:
+            self.shield_energy_ch += 1
+
+    def update(self, camera, textures):
+        self.last_shot += 1
+
+        if self.last_shot >= fps * 5:
+            self.shoot()
+            self.last_shot = 0
+
+        self.last_shell += 1
+
+        if self.last_shell >= fps * 10:
+            if self.shell():
+                self.last_shell = 0
+
+        if self.stand:
+            self.v_x = 0
+
+        elif self.left:
+            self.v_x = -DESTROYER_SPEED
+        else:
+            self.v_x = DESTROYER_SPEED
+
+        if self.process[0] == 3:
+            self.process[1] += 6 / fps
+
+            if int(self.process[1]) == len(self.hit_mas_right):
+                self.process = [0, 0]
+                self.image = self.going_mas_right[0]
+                self.rect.height = self.image.get_rect().height
+
+            elif self.left:
+                self.image = self.hit_mas_left[int(self.process[1])]
+            else:
+                self.image = self.hit_mas_right[int(self.process[1])]
+
+            self.rect.height = self.image.get_rect().height
+            if self.onGround:
+                self.rect.bottom = self.onGround
+
+            self.v_y += GRAVITY / fps
+            self.onGround = False
+            self.rect.y += self.v_y / fps
+            self.check_collide_y(self.v_y, textures)
+
+            camera.move_camera(self)
+            return
+
+        if self.process[0] == -2:
+            self.process[1] += 10 / fps
+
+            if self.process[1] < len(self.die_1_mas_left):
+                if self.left:
+                    self.image = self.die_1_mas_left[int(self.process[1])]
+                else:
+                    self.image = self.die_1_mas_right[int(self.process[1])]
+            elif self.process[1] > len(self.die_1_mas_left) * 2:
+                self.kill()
+
+            bottom = self.rect.bottom
+            self.rect.height = self.image.get_rect().height
+            self.rect.bottom = bottom
+
+            camera.move_camera(self)
+
+            return
+
+        if self.process[0] == 2:
+            self.process[1] += 8 / fps
+
+            if self.process[1] < len(self.shoot_mas_left):
+                if self.left:
+                    self.image = self.shoot_mas_left[int(self.process[1])]
+                else:
+                    self.image = self.shoot_mas_right[int(self.process[1])]
+
+            else:
+                self.process = [0, 0]
+                # Пуля Дройдека ведет себя также, как пуля супер дроида, поэтому создавать отдельный класс нет смысла
+                sprite = SuperBattleDroidBullet(self.bullets,
+                                                self.rect.x, self.rect.y + self.rect.height * 0.22,
+                                                self.left, self)
+                self.bullets.add(sprite)
+                self.finished = True
+
+            camera.move_camera(self)
+            return
+
+        if self.process[0] == 10:
+            self.rect.bottom = self.onGround - 20
+            self.process[1] += 8 / fps
+
+            if self.process[1] < len(self.shell_mas_left):
+                if self.left:
+                    self.image = self.shell_mas_left[int(self.process[1])]
+                else:
+                    self.image = self.shell_mas_right[int(self.process[1])]
+
+            elif self.shield_energy_ch >= 3:
+                self.process = [0, 0]
+
+            camera.move_camera(self)
+            return
+
+        if self.stand:
+            if self.left:
+                self.image = self.stand_left
+            else:
+                self.image = self.stand_right
+
+        elif self.process[0] == 0:
+            self.process[1] += 5 / fps
+            if int(self.process[1]) == len(self.going_mas_right):
+                self.process[1] = 0
+
+            if self.left:
+                self.image = self.going_mas_left[int(self.process[1])]
+            else:
+                self.image = self.going_mas_right[int(self.process[1])]
+
+        self.v_y += GRAVITY / fps
+
+        self.onGround = False
+
+        self.rect.y += self.v_y / fps
+        self.check_collide_y(self.v_y, textures)
+
+        if self.mas_stand:
+            v_mas = []
+            for i in self.mas_stand:
+                v_mas.append(i.get_speed(self.v_x, DESTROYER_SPEED, self.left))
             self.v_x = sum(v_mas) / len(v_mas)
 
         self.rect.x += int(self.v_x / fps)
