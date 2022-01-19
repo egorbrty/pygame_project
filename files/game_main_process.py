@@ -15,11 +15,15 @@ from decorations import Decoration
 
 
 class MainHero(pygame.sprite.Sprite):
+    """Класс главного героя"""
+    # Рассчет значения, на которое нужно домножить длину и ширину главного героя исходя из констант и высоты картинки
     image = load_image(f"data/pictures/clone/running/run1.png", -1)
     image_rect = image.get_rect()
     koeff = MAIN_HERO_HEIGHT / image_rect.height
 
     sizes = (SIZE_OF_BLOCK, SIZE_OF_BLOCK)
+
+    # __________________________________________________Загрузка картинок_______________________________________________
     going_mas_right = []
     going_mas_left = []
 
@@ -110,6 +114,7 @@ class MainHero(pygame.sprite.Sprite):
 
     jump_image_right = image
     jump_image_left = pygame.transform.flip(image, True, False)
+    # __________________________________________________Загрузка картинок_______________________________________________
 
     def __init__(self, group, start_hp, armor, hit, crit, dexterity, accuracy, x_pos, y_pos, money):
         super().__init__(group)
@@ -143,6 +148,7 @@ class MainHero(pygame.sprite.Sprite):
         self.v_x = 0  # Скорость движения по вертикали
         self.v_y = 0  # Скорость движения по горизонтали
 
+        # В этой переменной будет храться высота, на которой находится персонаж (на земле) или False, если он летит
         self.onGround = self.start_position_y
 
         self.picture_width = self.rect.width
@@ -158,20 +164,20 @@ class MainHero(pygame.sprite.Sprite):
 
     def get_damage_ch(self, damage, y_pos=None):
         # Получает урон
+        # Если живой
         if not self.is_alive():
             return
 
         self.hp -= damage
 
-
         if self.hp <= 0:
             if y_pos is not None:
                 self.onGround = y_pos
 
-            self.die_2()
+            self.die_2()  # Смерть
         else:
             if self.onGround and y_pos is None:
-                self.process = [3, 0]
+                self.process = [3, 0]  # Анимация урона
 
     def get_damage_ch_shot(self, damage, left):
         # Получает урон от выстрела
@@ -188,6 +194,7 @@ class MainHero(pygame.sprite.Sprite):
                 self.process = [3, 0]
 
     def is_alive(self):
+        # Возвращает инфу о том, жив ли персонаж
         return self.hp > 0
 
     def get_damage(self, damage):
@@ -202,7 +209,7 @@ class MainHero(pygame.sprite.Sprite):
         if self.rect.x < 0 or self.rect.x > width:
             self.fall = True
             self.die_2()
-        elif self.rect.y < 0 or self.rect.y > height:
+        elif self.rect.y > height:
             self.fall = True
             self.die_2()
 
@@ -228,7 +235,7 @@ class MainHero(pygame.sprite.Sprite):
             camera.move_camera(self)
             return
 
-        if self.last_damage < 15:
+        if self.last_damage < 15:  # Определяет, когда ты получил удар в последний раз
             self.last_damage += 15 / fps
         if self.process[0] == -1:
             self.process[1] += 10 / fps
@@ -308,6 +315,7 @@ class MainHero(pygame.sprite.Sprite):
             return
 
         elif self.process[0] == 3:
+            # Урон
             self.process[1] += 10 / fps
             if int(self.process[1]) == len(MainHero.hit_mas_left):
                 self.process = [5, 0]
@@ -331,6 +339,7 @@ class MainHero(pygame.sprite.Sprite):
             # hit_mas_left
 
         if space and self.process[0] in (0, 5) and self.onGround:
+            # Бег
             if self.process[0] != 2:
                 self.process = [2, 0]
                 self.finished = False
@@ -339,6 +348,7 @@ class MainHero(pygame.sprite.Sprite):
                     self.rect.x += MAIN_HERO_HEIGHT * 0.18
 
         if self.process[0] == 2:
+            # Атака
             if not self.onGround:
                 self.process = [5, 0]
                 self.finished = True
@@ -349,13 +359,14 @@ class MainHero(pygame.sprite.Sprite):
                     self.rect.x -= MAIN_HERO_HEIGHT * 0.18
 
             else:
+                # Момент выстрела
                 if self.left:
                     self.image = self.shoot_mas_left[int(self.process[1])]
                 else:
                     self.image = self.shoot_mas_right[int(self.process[1])]
 
                 if int(self.process[1]) == 5 and not self.finished:
-                    sprite = Bullet(field.main_hero_bullet_sprites,
+                    sprite = Bullet(field.main_hero_bullet_sprites,  # Создание спрайта пули
                                     self.rect.x + MAIN_HERO_HEIGHT * 0.55,
                                     self.rect.y + MAIN_HERO_HEIGHT * 0.25,
                                     self.hit, self.crit, self.accuracy, self.left, self.money)
@@ -377,6 +388,7 @@ class MainHero(pygame.sprite.Sprite):
 
 
         self.v_x = 0
+        # ________________________Определение скорости__________________________________________________________--
         if left and self.process[0] != 2:
             self.v_x -= self.speed
             self.left = True
@@ -392,10 +404,11 @@ class MainHero(pygame.sprite.Sprite):
             self.v_y += GRAVITY / fps
         self.v_y += 1
         self.onGround = False
+        # ________________________Определение скорости__________________________________________________________--
 
         self.rect.y += self.v_y / fps
 
-        self.check_collide_y(self.v_y, field.textures_sprites)
+        self.check_collide_y(self.v_y, field.textures_sprites)  # Не позволяет игроку пройти сквозь блок
         # Рассчет скорости (зависит от блоков, по которым движется персонаж)
         if self.mas_stand:
             v_mas = []
@@ -414,7 +427,7 @@ class MainHero(pygame.sprite.Sprite):
                 if self.process[0] != 5:
                     self.process = [5, 0]
 
-            if self.process[0] == 0:
+            if self.process[0] == 0:  # Идет
                 self.rect.height = MainHero.run_height
 
                 self.rect.bottom = self.onGround
@@ -427,7 +440,7 @@ class MainHero(pygame.sprite.Sprite):
                 else:
                     self.image = MainHero.going_mas_right[int(self.process[1])]
 
-            elif self.process[0] == 5:
+            elif self.process[0] == 5:  # Стоит
                 if self.left:
                     self.image = MainHero.stand_mas_left[int(self.process[1])]
                 else:
@@ -441,7 +454,7 @@ class MainHero(pygame.sprite.Sprite):
                 self.rect.bottom = self.onGround
                 self.rect.height = self.image.get_rect().height
 
-        elif self.process[0] != 3:
+        elif self.process[0] != 3:  # Не получение урона
             if self.process[0] not in (-2, -3):
                 self.process = [1, 0]
                 if self.left:
@@ -478,6 +491,7 @@ class MainHero(pygame.sprite.Sprite):
         self.check_position()
 
     def check_collide_x(self, v_x, textures):
+        # Не пропускает игрока внутрь блока (ось абцисс)
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):  # если есть пересечение платформы с игроком
                 if v_x > 0:
@@ -487,6 +501,7 @@ class MainHero(pygame.sprite.Sprite):
                     self.rect.left = texture.rect.right
 
     def check_collide_y(self, v_y, textures):
+        # Не пропускает игрока внутрь блока (ось ординат)
         self.rect.y += 1
         self.mas_stand.clear()
 
@@ -507,6 +522,8 @@ class MainHero(pygame.sprite.Sprite):
             self.rect.bottom = min(bottom)
 
     def check_if_on_the_ground(self, textures):
+        # На земле ли игрок?
+
         self.rect.y += 5
         for texture in textures:
             if pygame.sprite.collide_rect(self, texture):
@@ -517,17 +534,23 @@ class MainHero(pygame.sprite.Sprite):
         return False
 
     def die_1(self):
+        # Смерть от пули
         self.process = [-2, 0]
         self.fall = not self.onGround
 
     def die_2(self):
+        # Смерть от шипов или прямого контакта
         self.process = [-3, 0]
         self.fall = not self.onGround
 
     def die(self):
+        # Смерть
+
         field.replay()
 
     def replay(self):
+        # Игра начинается с начала - все параметры сбрасываются
+
         self.rect.x = self.start_position_x * SIZE_OF_BLOCK
         self.rect.bottom = self.start_position_y * SIZE_OF_BLOCK + SIZE_OF_BLOCK
 
@@ -548,12 +571,14 @@ class MainHero(pygame.sprite.Sprite):
 
 
 class Field:
+    """Сам экран"""
     def __init__(self, money):
         self.money_sprite = pygame.sprite.Group()
         self.money = Money(self.money_sprite, money)
         self.money_sprite.add(self.money)
 
     def start_game(self, map_name, main_hero_parameters):
+        # Начало игры
         self.main_hero_parameters = main_hero_parameters
         f = open(map_name, 'r', encoding='utf-8')
         self.map_name = map_name
@@ -592,53 +617,54 @@ class Field:
         main_hero_pos = (0, 0)
         star_pos = (0, 0)
         for i in range(self.level_height):
+            # Просмотр карты
             line = f.readline()
             for j in range(self.level_width):
-                if line[j] == '3':
+                if line[j] == '3':  # Камень
                     sprite = Stone(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '1':
+                elif line[j] == '1':  # Земля
                     sprite = Grass(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '2':
+                elif line[j] == '2':  # песок
                     sprite = Sand(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '6':
+                elif line[j] == '6':  # платформа
                     sprite = Platform(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '7':
+                elif line[j] == '7':  # Шипы
                     sprite = Spike(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '8':
+                elif line[j] == '8':  # Лед
                     sprite = Ice(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '9':
+                elif line[j] == '9':  # Деревянный блок (можно пробить)
                     sprite = BreakingWall(self.textures_sprites, j, i)
                     self.textures_mas.append(sprite)
                     self.textures_sprites.add(sprite)
 
-                elif line[j] == '#':
+                elif line[j] == '#':  # Главный перс
                     main_hero_pos = (j, i)
 
-                elif line[j] == 'A':
+                elif line[j] == 'A':  # Далее враги
                     sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, False,
                                          self.enemies_bullet_sprites)
                     self.persons_sprites.add(sprite)
                     self.start_position_a.append(((j, i), False))
 
-                elif line[j] == 'a':
+                elif line[j] == 'a':  # Маленькая буква - враг стоит
                     sprite = BattleDroid(self.persons_sprites, *self.persons_a, j, i, True,
                                          self.enemies_bullet_sprites)
                     self.persons_sprites.add(sprite)
@@ -668,19 +694,19 @@ class Field:
                     self.persons_sprites.add(sprite)
                     self.start_position_c.append(((j, i), True))
 
-                elif line[j] == '@':
+                elif line[j] == '@':  # Конец карты
                     sprite = Cup(self.cup_sprites, j, i)
                     self.cup_sprites.add(sprite)
 
-                elif line[j] == 'R':
+                elif line[j] == 'R':  # Указатель на право
                     sprite = Decoration(self.decoration_sprites, j, i, r'data\pictures\decorations\right.png')
                     self.decoration_sprites.add(sprite)
 
-                elif line[j] == 'L':
+                elif line[j] == 'L':  # Указатель на лево
                     sprite = Decoration(self.decoration_sprites, j, i, r'data\pictures\decorations\left.png')
                     self.decoration_sprites.add(sprite)
 
-                elif line[j] == '*':
+                elif line[j] == '*':  # Звезда
                     star_pos = (j, i)
 
         self.main_hero = MainHero(self.main_hero_sprite, *self.main_hero_parameters, *main_hero_pos, self.money)
@@ -694,6 +720,7 @@ class Field:
         f.close()
 
     def replay(self):
+        # Игра сначала
         for i in self.persons_sprites:
             i.kill()
         for i in self.enemies_bullet_sprites:
@@ -728,6 +755,7 @@ class Field:
             i.replay()
 
     def update(self, left, right, up, space):
+        # Обновление экрана
         self.main_hero_sprite.update(left, right, up, space)
         self.persons_sprites.update(camera, self.textures_sprites)
         self.textures_sprites.update(camera)
@@ -766,15 +794,16 @@ class Field:
         self.star_sprite.update(camera)
         self.star_sprite.draw(screen)
 
-        for cup in self.cup_sprites:
-            if pygame.sprite.collide_rect(self.main_hero, cup):  # если есть пересечение платформы с игроком
+        for cup in self.cup_sprites:  # Касается ли персонаж кубка
+            if pygame.sprite.collide_rect(self.main_hero, cup):
                 return 'win'
 
-        for star in self.star_sprite:
+        for star in self.star_sprite:  # Касается ли персонаж звезды
             if pygame.sprite.collide_rect(self.main_hero, star):  # если есть пересечение платформы с игроком
                 self.star.kill()
 
     def move_camera_back(self):
+        # Возвращает камеру на место
         for sprite in self.main_hero_sprite:
             camera.move_back(sprite)
 
@@ -800,6 +829,7 @@ class Field:
             camera.move_back(sprite)
 
 def play(map_name, main_hero_parameters, start_money):  # Сколько денег у игрока было в момент игры
+    # Самая главная функция - вызывается при выборе уровня
     global camera, field
     running = True
     clock = pygame.time.Clock()
@@ -843,11 +873,12 @@ def play(map_name, main_hero_parameters, start_money):  # Сколько ден�
                              (int(width * 0.2), int(height * 0.3), int(width * 0.6), int(height * 0.4)),
                              5
                              )
+
             pause_window_buttons.update(mouse_pos)
             pause_window_buttons.draw(screen)
 
             if click and exit_button.rect.collidepoint(mouse_pos):
-                return 0, field.money.number
+                return (0, 0, 0), field.money.number
             elif click and replay_button.rect.collidepoint(mouse_pos):
                 field.replay()
                 game_paused = False

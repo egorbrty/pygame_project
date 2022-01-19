@@ -542,7 +542,7 @@ class Destroyer(Enemy):
         self.height = DESTROYER_HEIGHT
         self.bullets = bullets
         self.last_shot = random.randint(0, fps * 5)
-        self.last_shell = 9.9
+        self.last_shell = random.randint(0, fps * 10)
         self.shield_energy_ch = 0
 
     def shell(self):
@@ -565,7 +565,8 @@ class Destroyer(Enemy):
             self.shoot()
             self.last_shot = 0
 
-        self.last_shell += 1
+        if self.process[0] != 10:
+            self.last_shell += 1
 
         if self.last_shell >= fps * 10:
             if self.shell():
